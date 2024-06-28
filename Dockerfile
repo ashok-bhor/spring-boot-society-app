@@ -1,14 +1,12 @@
+# Use Maven image to build the application
+FROM maven:3.8.1-openjdk-8 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package
+
 # Use an official OpenJDK runtime as a parent image
 FROM openjdk:8-jdk-alpine
-
-# Set the working directory in the container
 WORKDIR /app
-
-# Copy the application's jar file to the container
-COPY target/spring-boot-society-app-0.0.1-SNAPSHOT.jar /app/spring-boot-society-app-0.0.1-SNAPSHOT.jar
-
-# Make port 8080 available to the world outside this container
+COPY --from=build /app/target/spring-boot-society-app-0.0.1-SNAPSHOT.jar /app/spring-boot-society-app-0.0.1-SNAPSHOT.jar
 EXPOSE 8080
-
-# Run the jar file
-ENTRYPOINT ["java","-jar","your-app.jar"]
+ENTRYPOINT ["java", "-jar", "spring-boot-society-app-0.0.1-SNAPSHOT.jar"]
