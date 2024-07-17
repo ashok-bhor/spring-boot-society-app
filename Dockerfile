@@ -1,11 +1,10 @@
-# Use Maven image to build the application
-FROM eclipse-temurin:17-jdk-alpine AS build
+FROM adoptopenjdk:8-jdk-hotspot AS build
+RUN apt-get update && apt-get install -y maven
 WORKDIR /app
 COPY . .
 RUN mvn clean package
 
-# Use an official OpenJDK runtime as a parent image
-FROM openjdk:8-jdk-alpine
+FROM adoptopenjdk:8-jdk-hotspot
 WORKDIR /app
 COPY --from=build /app/target/spring-boot-society-app-0.0.1-SNAPSHOT.jar /app/spring-boot-society-app-0.0.1-SNAPSHOT.jar
 EXPOSE 8080
