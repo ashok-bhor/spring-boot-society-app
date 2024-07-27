@@ -3,11 +3,16 @@ package com.abpoint.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map;
+
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +20,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.abpoint.model.ExtraChargesEntry;
 import com.abpoint.model.GridData;
@@ -52,10 +56,40 @@ public class SocietyController {
 		System.out.println("ece: " + ece);
 		return serviceSociety.saveExtraCharges(ece);
 	}
+
+	@GetMapping("/login")
+	public String login(@RequestParam(value = "error", required = false) String error, Model model) {
+		if (error != null) {
+			model.addAttribute("error", "Access denied.");
+		}
+
+		return "login";
+	}
+
 	@GetMapping("/index")
-    public String index() {
-        return "index"; // This should match the name of your HTML file in the templates folder
-    }
+	public String index(Model model, HttpSession session) {
+		// Fetch the role if the user is authenticated
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication != null && authentication.isAuthenticated()
+				&& authentication.getPrincipal() instanceof User) {
+			User user = (User) authentication.getPrincipal();
+			String role = user.getAuthorities().iterator().next().getAuthority();
+			System.out.println("role:" + role);
+			
+			//session.setAttribute("userRole", role);
+			//model.addAttribute("userRole", role);
+			if ("ROLE_ADMIN".equals(role)) {
+				session.setAttribute("userRoleModified", "ADMIN");
+				model.addAttribute("userRoleModified", "ADMIN");
+			}else {
+				session.setAttribute("userRoleModified", "MEMBER");
+				model.addAttribute("userRoleModified", "MEMBER");
+			}
+			
+		}
+
+		return "index"; // The name of your Thymeleaf template for the homepage
+	}
 
 	@GetMapping("/getPaidAmountForYear")
 	public ResponseEntity<Map<String, Double>> getPaidAmountForYear(@RequestParam int flatNumber,

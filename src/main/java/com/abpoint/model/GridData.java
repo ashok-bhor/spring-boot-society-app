@@ -4,9 +4,7 @@ public class GridData {
 
 	private int flatNumber;
 	private double outstandingAmount;
-	
-	
-	
+
 	public GridData(int flatNumber, double outstandingAmount) {
 		super();
 		this.flatNumber = flatNumber;

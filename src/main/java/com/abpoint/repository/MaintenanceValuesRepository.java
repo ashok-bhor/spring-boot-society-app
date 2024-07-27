@@ -1,5 +1,6 @@
 package com.abpoint.repository;
 
+
 import java.util.Map;
 
 import org.springframework.data.jpa.repository.JpaRepository;

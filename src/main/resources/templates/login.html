@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            margin-top: -200px; /* Adjust this value as needed */
+        }
+        .login-container {
+            background-color: #ffffff;
+            padding: 20px 60px; /* Increased padding for more space */
+            width: 350px; /* Increased width */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: tomato;
+            font-size: 32px;
+            text-align: center;
+            font-family: Tahoma, Verdana, sans-serif;
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007BFF;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Amrutsidddhi 08</h1>
+        <form th:action="@{/login}" method="post" id="loginForm" onsubmit="return validateForm()">
+            <div class="form-group">
+                <input type="text" id="username" name="username" placeholder="Username"/>
+                <br><br>
+                <div id="usernameError" class="error"></div>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" name="password" placeholder="Password"/>
+                <br><br>
+                <div id="passwordError" class="error"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Sign in</button>
+            <div th:if="${error}" class="alert alert-danger mt-3">
+                <p th:text="${error}"></p>
+            </div>
+        </form>
+    </div>
+    <script>
+        function validateForm() {
+            var isValid = true;
+            
+            var username = document.getElementById('username').value;
+            var usernameError = document.getElementById('usernameError');
+            if (username.length < 3) {
+                usernameError.textContent = "Username can't be empty.";
+                isValid = false;
+            } else {
+                usernameError.textContent = "";
+            }
+
+            var password = document.getElementById('password').value;
+            var passwordError = document.getElementById('passwordError');
+            if (password.length < 6) {
+                passwordError.textContent = "Password can't be empty.";
+                isValid = false;
+            } else {
+                passwordError.textContent = "";
+            }
+
+            return isValid;
+        }
+    </script>
+</body>
+</html>

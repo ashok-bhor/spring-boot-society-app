@@ -3,7 +3,6 @@ package com.abpoint.model;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
 @Entity
 @Table(name = "society_maintenance_values_year_wise ")
 public class SocietyMaintenanceValuesYearWise {

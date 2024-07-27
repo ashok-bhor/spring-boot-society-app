@@ -4,7 +4,7 @@ package com.abpoint.model;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
 import java.util.Objects;
 
 import javax.persistence.Entity;
@@ -12,9 +12,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Objects;
 
 //mark class as an Entity 
 @Entity

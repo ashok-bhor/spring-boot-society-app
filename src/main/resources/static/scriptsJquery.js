@@ -42,11 +42,11 @@ function fetchPaymentHistory(flatNumber) {
                             <td>${item.paymentMethod}</td>
                             <td>${item.transactionId}</td>
                             <td>${item.verified}</td>
-                            <td>
+                            <td sec:authorize="hasRole('ROLE_ADMIN')">
                                 <button class="btn btn-primary btn-sm edit-btn">Edit</button>
                                 <button class="btn btn-danger btn-sm delete-btn">Delete</button>
                                 <button class="btn btn-secondary btn-sm cancel-btn" style="display:none;">Cancel</button>
-                            </td>
+                            </td>    
                         </tr>`
                     );
                 });
@@ -282,7 +282,8 @@ $(document).ready(function () {
             $.ajax({
                 url: 'http://localhost:8080/deletePaymentHistory/' + id,
                 method: 'DELETE',
-                data: { deleteReason: reason }, // Replace 'reason' with the actual reason value
+                data: { deleteReason: reason }, // Replace 'reason' with the
+												// actual reason value
                 success: function (response) {
                     alert('Data deleted successfully!');
                     $('#deleteModal').modal('hide');

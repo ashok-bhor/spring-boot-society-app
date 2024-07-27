@@ -232,13 +232,14 @@ function submitForm() {
         });
 }
 
+
 function submitExtraCharges() {
     // Get form values
     const flatNumber = document.getElementById('flatNumber').value;
     const amount = parseFloat(document.getElementById('amount').value);
     const reason = document.getElementById('reason').value;
     const comments = document.getElementById('comments').value;
-    
+
     // Construct JSON object
     const jsonData = {
         flatNumber: parseInt(flatNumber),
@@ -255,17 +256,42 @@ function submitExtraCharges() {
         },
         body: JSON.stringify(jsonData)
     })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             console.log('Success:', data);
-            alert('Extra charges added successfully!');
+            showAlert('Extra charges added successfully!', 'success');
             // Optionally clear form fields or perform other actions
         })
         .catch((error) => {
             console.error('Error:', error);
-            alert('Failed to extra charges');
+            showAlert('Failed to add extra charges', 'danger');
         });
 }
+
+function showAlert(message, type) {
+    const alertPlaceholder = document.getElementById('alertPlaceholder');
+    const alertHTML = `<div class="alert alert-tooltip alert-${type} fade show" role="alert">
+    ${message}
+</div>`;
+    
+    alertPlaceholder.innerHTML = alertHTML;
+
+    // Automatically close alert after 3 seconds
+    setTimeout(() => {
+        const alertElement = alertPlaceholder.querySelector('.alert');
+        if (alertElement) {
+            const alert = new bootstrap.Alert(alertElement);
+            alert.close();
+        }
+    }, 3000);
+}
+
+
 
 
 // Function to export data

@@ -1,104 +1,172 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Society Maintenance Application</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- jQuery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <!-- Bootstrap JS -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-    <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden; /* Prevents scrollbars */
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Society Maintenance Application</title>
+<!-- Bootstrap CSS -->
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<!-- jQuery -->
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- Bootstrap JS -->
+<script
+	src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script>
+	$(document).ready(function() {
+		$('[data-toggle="tooltip"]').tooltip();
+	});
+</script>
+<style>
+body, html {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	overflow: hidden; /* Prevents scrollbars */
+}
 
-        .container-fluid {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
+.container-fluid {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
 
-        .nav-tabs {
-            justify-content: center;
-            border-bottom: none; /* Remove default bottom border */
-            background-color: #f0f0f0; /* Background color for tabs */
-            padding: 10px 0; /* Adjust top and bottom padding */
-        }
+.nav-tabs {
+	justify-content: center;
+	border-bottom: none; /* Remove default bottom border */
+	background-color: #f0f0f0; /* Background color for tabs */
+	padding: 10px 0; /* Adjust top and bottom padding */
+}
 
-        .nav-tabs .nav-link {
-            color: #666; /* Default tab text color */
-            border: none; /* Remove border */
-            background-color: #f0f0f0; /* Default tab background */
-            margin-right: 10px; /* Adjust spacing between tabs */
-        }
+.nav-tabs .nav-link {
+	color: #666; /* Default tab text color */
+	border: none; /* Remove border */
+	background-color: #f0f0f0; /* Default tab background */
+	margin-right: 10px; /* Adjust spacing between tabs */
+}
 
-        .nav-tabs .nav-link.active {
-            color: #fff; /* Active tab text color */
-            background-color: #007bff; /* Active tab background color */
-        }
+.nav-tabs .nav-link:hover {
+	color: #fff; /* Hover text color */
+	background-color: #008b8b; /* Hover background color */
+}
 
-        .tab-content {
-            flex: 1; /* Fill remaining vertical space */
-            overflow: hidden; /* Hide overflow */
-            position: relative; /* Position content absolutely */
-        }
+.nav-tabs .nav-link.active {
+	color: #fff; /* Active tab text color */
+	background-color: #ff7f50; /* Active tab background color */
+}
 
-        .tab-pane {
-            position: absolute; /* Position tabs absolutely */
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-        }
+.tab-content {
+	flex: 1; /* Fill remaining vertical space */
+	overflow: hidden; /* Hide overflow */
+	position: relative; /* Position content absolutely */
+}
 
-        .tab-pane iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-    </style>
+.tab-pane {
+	position: absolute; /* Position tabs absolutely */
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+.tab-pane iframe {
+	width: 100%;
+	height: 100%;
+	border: none;
+}
+</style>
 </head>
 <body>
-    <div class="container-fluid">
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link active" id="maintenance-dashboard-tab" data-toggle="tab" href="#maintenance-dashboard" role="tab" aria-controls="maintenance-dashboard" aria-selected="true">Maintenance Dashboard</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="maintenance-entry-tab" data-toggle="tab" href="#maintenance-entry" role="tab" aria-controls="maintenance-entry" aria-selected="false">Maintenance Entry</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="add-extra-charges-tab" data-toggle="tab" href="#add-extra-charges" role="tab" aria-controls="add-extra-charges" aria-selected="false">Add Extra Charges</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="grid-view-tab" data-toggle="tab" href="#grid-view" role="tab" aria-controls="grid-view"  aria-selected="false">Grid View</a>
-            </li>
-        </ul>
-        <div class="tab-content mt-2" id="myTabContent">
-            <!-- Content panes for each tab -->
-            <div class="tab-pane fade show active" id="maintenance-dashboard" role="tabpanel" aria-labelledby="maintenance-dashboard-tab">
-                <!-- Content of maintenanceDashboard.html will be loaded here -->
-                <iframe src="maintenanceDashboard.html"></iframe>
-            </div>
-            <div class="tab-pane fade" id="maintenance-entry" role="tabpanel" aria-labelledby="maintenance-entry-tab">
-                <!-- Content of maintenance-entry.html will be loaded here -->
-                <iframe src="maintenance-entry.html"></iframe>
-            </div>
-            <div class="tab-pane fade" id="add-extra-charges" role="tabpanel" aria-labelledby="add-extra-charges-tab">
-                <!-- Content of add-extra-charges.html will be loaded here -->
-                <iframe src="add-extra-charges.html"></iframe>
-            </div>
-            <div class="tab-pane fade" id="grid-view" role="tabpanel" aria-labelledby="grid-view-tab">
-                <!-- Content of grid-view.html will be loaded here -->
-                <iframe src="grid-view.html"></iframe>
-            </div>
-        </div>
+
+<h1>Welcome to Thymeleaf with Spring Security</h1>
+
+<div align="center">	
+	<div sec:authorize="isAuthenticated()">
+		Welcome <b><span sec:authentication="name">Username</span></b>
+		&nbsp;
+		<i><span sec:authentication="principal.authorities">Roles</span></i>
+	</div>
+
+    <div sec:authorize="hasRole('MEMBER')">
+        <p>This content is only visible to users with the ROLE_USER role.</p>
     </div>
+
+    <div sec:authorize="hasRole('ADMIN')">
+        <p>This content is only visible to users with the ROLE_ADMIN role.</p>
+    </div>
+
+    <div sec:authorize="isAuthenticated()">
+        <p>This content is only visible to authenticated users.</p>
+    </div>
+
+    <div sec:authorize="isAnonymous()">
+        <p>This content is only visible to anonymous users.</p>
+    </div>
+
+	<div class="container-fluid">
+		<ul class="nav nav-tabs" id="myTab" role="tablist">
+			<li class="nav-item"><a class="nav-link active"
+				id="maintenance-dashboard-tab" data-toggle="tab"
+				href="#maintenance-dashboard" role="tab"
+				aria-controls="maintenance-dashboard" aria-selected="true">Maintenance
+					Dashboard</a></li>
+			<li class="nav-item"><a class="nav-link"
+				id="maintenance-entry-tab" data-toggle="tab"
+				href="#maintenance-entry" role="tab"
+				aria-controls="maintenance-entry" aria-selected="false">Maintenance
+					Entry</a></li>
+			<li class="nav-item"><a class="nav-link"
+				id="add-extra-charges-tab" data-toggle="tab"
+				href="#add-extra-charges" role="tab"
+				aria-controls="add-extra-charges" aria-selected="false">Add
+					Extra Charges</a></li>
+			<li class="nav-item"><a class="nav-link" id="grid-view-tab"
+				data-toggle="tab" href="#grid-view" role="tab"
+				aria-controls="grid-view" aria-selected="false">Grid View</a></li>
+
+			<!-- Display the user's role -->
+			<li class="nav-item">
+				<button type="submit" class="btn btn-info"
+					style="margin-right: 10px;">
+					<span data-toggle="tooltip" title="You are logged in as"
+						th:text="${session.userRoleModified}"></span>
+				</button>
+			</li>
+
+			<li>
+				<!-- Logout Button -->
+				<form th:action="@{/logout}" method="post" style="display: inline;">
+					<button type="submit" class="btn btn-danger"
+						style="margin-left: 10px;">Logout</button>
+				</form>
+			</li>
+
+		</ul>
+		<div class="tab-content mt-2" id="myTabContent">
+			<!-- Content panes for each tab -->
+			<div class="tab-pane fade show active" id="maintenance-dashboard"
+				role="tabpanel" aria-labelledby="maintenance-dashboard-tab">
+				<!-- Content of maintenanceDashboard.html will be loaded here -->
+				<iframe src="maintenanceDashboard.html"></iframe>
+			</div>
+			<div class="tab-pane fade" id="maintenance-entry" role="tabpanel"
+				aria-labelledby="maintenance-entry-tab">
+				<!-- Content of maintenance-entry.html will be loaded here -->
+				<iframe src="maintenance-entry.html"></iframe>
+			</div>
+			<div class="tab-pane fade" id="add-extra-charges" role="tabpanel"
+				aria-labelledby="add-extra-charges-tab">
+				<!-- Content of add-extra-charges.html will be loaded here -->
+				<iframe src="add-extra-charges.html"></iframe>
+			</div>
+			<div class="tab-pane fade" id="grid-view" role="tabpanel"
+				aria-labelledby="grid-view-tab">
+				<!-- Content of grid-view.html will be loaded here -->
+				<iframe src="grid-view.html"></iframe>
+			</div>
+		</div>
+	</div>
 </body>
 </html>
