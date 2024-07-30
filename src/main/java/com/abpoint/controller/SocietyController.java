@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,13 +24,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.abpoint.model.ExtraChargesEntry;
 import com.abpoint.model.GridData;
+import com.abpoint.model.MaintenanceDashboardCard;
 import com.abpoint.model.MaintenanceDashboardEntry;
 import com.abpoint.model.SocietyMaintenanceEntry;
 import com.abpoint.model.SocietyMaintenancePaidHistory;
 import com.abpoint.service.SocietyService;
 import com.abpoint.service.SocietyUtilServices;
 
-//@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://192.168.1.207:8080")
 @Controller
 public class SocietyController {
 //autowire the BooksService class
@@ -52,7 +54,7 @@ public class SocietyController {
 	}
 
 	@PostMapping("/saveExtraCharges")
-	private ResponseEntity<ExtraChargesEntry> saveExtraCharges(@RequestBody ExtraChargesEntry ece) throws Exception {
+	public  ResponseEntity<ExtraChargesEntry> saveExtraCharges(@RequestBody ExtraChargesEntry ece) throws Exception {
 		System.out.println("ece: " + ece);
 		return serviceSociety.saveExtraCharges(ece);
 	}
@@ -69,27 +71,20 @@ public class SocietyController {
 	@GetMapping("/index")
 	public String index(Model model, HttpSession session) {
 		// Fetch the role if the user is authenticated
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication != null && authentication.isAuthenticated()
-				&& authentication.getPrincipal() instanceof User) {
-			User user = (User) authentication.getPrincipal();
-			String role = user.getAuthorities().iterator().next().getAuthority();
-			System.out.println("role:" + role);
-			
-			//session.setAttribute("userRole", role);
-			//model.addAttribute("userRole", role);
-			if ("ROLE_ADMIN".equals(role)) {
-				session.setAttribute("userRoleModified", "ADMIN");
-				model.addAttribute("userRoleModified", "ADMIN");
-			}else {
-				session.setAttribute("userRoleModified", "MEMBER");
-				model.addAttribute("userRoleModified", "MEMBER");
-			}
-			
-		}
+				Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+				if (authentication != null && authentication.isAuthenticated()
+						&& authentication.getPrincipal() instanceof User) {
+					User user = (User) authentication.getPrincipal();
+					String role = user.getAuthorities().iterator().next().getAuthority();
+					String splitted = role.split("_")[1];
+					System.out.println("splitted::: "+splitted);
 
-		return "index"; // The name of your Thymeleaf template for the homepage
+					session.setAttribute("sessionRole", splitted);
+					
+				}
+	    return "index"; // The name of your Thymeleaf template for the homepage
 	}
+
 
 	@GetMapping("/getPaidAmountForYear")
 	public ResponseEntity<Map<String, Double>> getPaidAmountForYear(@RequestParam int flatNumber,
@@ -114,6 +109,15 @@ public class SocietyController {
 		System.out.println("getMaintenanceDashboardData data: " + data);
 		return ResponseEntity.ok(data);
 	}
+	
+	@GetMapping("/getMaintenanceDashboardCard/{flatNumber}")
+	public ResponseEntity<List<MaintenanceDashboardCard>> getMaintenanceDashboardCard(@PathVariable int flatNumber)
+			throws Exception {
+		System.out.println("SocietyController.getMaintenanceDashboardCard()");
+		List<MaintenanceDashboardCard> data = serviceSociety.getMaintenanceDashboardCardData(flatNumber);
+		System.out.println("getMaintenanceDashboardCard data: " + data);
+		return ResponseEntity.ok(data);
+	}
 
 //creating put mapping that updates the book detail 
 	@PutMapping("/smeUpdate")
@@ -126,6 +130,16 @@ public class SocietyController {
 		return serviceSociety.getPaidAmountForYear(flatNumber, year);
 	}
 
+	
+	@GetMapping("/getFlatType/{flatNumber}")
+	public ResponseEntity<String> getFlatType(@PathVariable int flatNumber) throws Exception {
+
+		ResponseEntity<String> flatType = societyUtilServices.getFlatType(flatNumber);
+
+		System.out.println("Flat type is:" + flatType);
+		return flatType;
+	}
+	
 	@GetMapping("/getExtraCharges/{flatNumber}")
 	public double getExtraCharges(@PathVariable int flatNumber) {
 

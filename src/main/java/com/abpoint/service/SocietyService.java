@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.abpoint.model.ExtraChargesEntry;
+import com.abpoint.model.MaintenanceDashboardCard;
 import com.abpoint.model.MaintenanceDashboardEntry;
 import com.abpoint.model.MaintenanceMasterEntry;
 import com.abpoint.model.SocietyMaintenanceEntry;
@@ -401,6 +402,13 @@ public class SocietyService {
 		return ResponseEntity.ok(sme);
 	}
 
+	
+	public List<MaintenanceDashboardCard> getMaintenanceDashboardCardData(int flatNumber) throws Exception {
+		
+	        return DashboardMapper.convertToDashboardCards(getMaintenanceDashboardData(flatNumber));
+		
+	}
+	
 	// Method to fetch maintenance dashboard data
 	public MaintenanceDashboardEntry getMaintenanceDashboardData(int flatNumber) throws Exception {
 

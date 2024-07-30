@@ -1,3 +1,19 @@
+const flatNumbers = [101, 102, 103, 104, 201, 202, 203, 204, 301, 302, 303, 304, 401, 402, 403, 404, 501, 502, 503, 504, 601, 602, 603, 604, 701, 702, 703, 704];
+
+// Define an array of year ranges
+const yearRanges = ["2016-17", "2017-18", "2018-19", "2019-20", "2020-21", "2021-22", "2022-23", "2023-24","2024-25"];
+const verfiedArray= [ "Yes", "No"];
+const paymentMethods = ["Cheque", "IMPS", "UPI", "Cash"];
+
+// Function to populate select elements
+function populateSelect(elementId, options) {
+    const selectElement = document.getElementById(elementId);
+    selectElement.innerHTML = options.map(option => `<option value="${option}">${option}</option>`).join('');
+}
+
+// Populate the dropdowns
+populateSelect('editPaymentMethod', paymentMethods);
+populateSelect('editVerified', verfiedArray);
 // Initialize formData object to store entered data
 let formData = {
     ownerName: ''
@@ -19,6 +35,30 @@ function getPaidAmountForYear() {
             });
     } else {
         document.getElementById('paidInYear').textContent = '0.0';
+    }
+}
+
+function getFlatType() {
+	const flatNumber = document.getElementById('flatNumber').value;
+    const url = `http://localhost:8080/getFlatType/${flatNumber}`;
+
+    try {
+        const response = fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const flatType =  response.text();
+        console.log("Flat type is:", flatType);
+        return flatType;
+    } catch (error) {
+        console.error('Error fetching flat type:', error);
     }
 }
 
@@ -159,8 +199,14 @@ function submitForm() {
                 console.log('Invalid date');
             } else {
                 // Extract day, month, and year
-                let day = dateObject.getDate().toString().padStart(2, '0'); // Ensure two digits for day
-                let month = (dateObject.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-based
+                let day = dateObject.getDate().toString().padStart(2, '0'); // Ensure
+																			// two
+																			// digits
+																			// for
+																			// day
+                let month = (dateObject.getMonth() + 1).toString().padStart(2, '0'); // Month
+																						// is
+																						// zero-based
                 let year = dateObject.getFullYear();
     
                 // Create formatted date string
@@ -179,7 +225,8 @@ function submitForm() {
         receivedTillNow: receivedTillNow,
         paidTillYear: paidTillYear,
         paidInYear: paidInYear,
-        date: formattedDate, // Ensure date is in the correct format "dd-MM-yyyy"
+        date: formattedDate, // Ensure date is in the correct format
+								// "dd-MM-yyyy"
         paymentMethod: paymentMethod,
         transactionId: transactionId,
         amount: amount,
@@ -205,7 +252,7 @@ function submitForm() {
             console.log('Success:', data);
             alert('Maintenance entry submitted successfully!');
 
-            // Map the response data to the HTML fields        
+            // Map the response data to the HTML fields
             const yearDropdown = document.getElementById('year');
             for (let i = 0; i < yearDropdown.options.length; i++) {
                 if (yearDropdown.options[i].value === data.paidTillYear) {
@@ -214,7 +261,8 @@ function submitForm() {
                 }
             }
             document.getElementById('flatType').innerText = data.flatType || '-';
-            //  document.getElementById('year').innerText = data.paidTillYear || '-';
+            // document.getElementById('year').innerText = data.paidTillYear ||
+			// '-';
             document.getElementById('annualMaintenance').innerText = data.annualMaintenance || '0.0';
             document.getElementById('previousOutstanding').innerText = data.previousOutstanding || '0.0';
             document.getElementById('paidTillYear').innerText = data.paidTillYear || '-';
@@ -236,18 +284,18 @@ function submitForm() {
 function submitExtraCharges() {
     // Get form values
     const flatNumber = document.getElementById('flatNumber').value;
-    const amount = parseFloat(document.getElementById('amount').value);
+    const chargedAmount = parseFloat(document.getElementById('amount').value);
     const reason = document.getElementById('reason').value;
     const comments = document.getElementById('comments').value;
 
     // Construct JSON object
     const jsonData = {
         flatNumber: parseInt(flatNumber),
-        amount: amount,
+        chargedAmount: chargedAmount,
         reason: reason,
         comments: comments
     };
-
+    alert('flatNumber- '+flatNumber);
     // Send data to Spring Boot backend via AJAX
     fetch('http://localhost:8080/saveExtraCharges', {
         method: 'POST',
@@ -335,17 +383,5 @@ function previewData() {
     alert(previewContent);
 }
 
-// Define an array of year ranges
-let yearRanges = [
-    "2016-17",
-    "2017-18",
-    "2018-19",
-    "2019-20",
-    "2020-21",
-    "2021-22",
-    "2022-23",
-    "2023-24",
-    "2024-25"
-];
 
 

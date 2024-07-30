@@ -1,12 +1,15 @@
 package com.abpoint.model;
 
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-
 
 @Entity
 @Table(name = "roles")
@@ -17,6 +20,8 @@ public class Role {
 	private Integer id;
 
 	private String name;
+	@ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
+	private Set<User> users;
 
 	public Integer getId() {
 		return id;
@@ -34,5 +39,18 @@ public class Role {
 		this.id = id;
 	}
 
-	// remaining getters and setters
+	public Set<User> getUsers() {
+		return users;
+	}
+
+	public void setUsers(Set<User> users) {
+		this.users = users;
+	}
+
+	@Override
+	public String toString() {
+		return "Role toString as: [id=" + id + ", name=" + name + ", users=" + users + "]";
+	}
+	
+	
 }

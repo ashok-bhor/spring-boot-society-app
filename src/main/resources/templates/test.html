@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<body>
+    <div sec:authorize="hasRole('ROLE_ADMIN')">
+        <p>This content is only visible to users with the ADMIN role.</p>
+    </div>
+    <div sec:authorize="hasRole('ROLE_USER')">
+        <p>This content is visible to users with the USER role.</p>
+    </div>
+</body>
+</html>

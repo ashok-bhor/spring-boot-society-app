@@ -1,23 +1,39 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Society Maintenance Application</title>
 <!-- Bootstrap CSS -->
-<link rel="stylesheet"
-	href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="/styles.css">
+
 <!-- jQuery -->
-<script
-	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <!-- Bootstrap JS -->
-<script
-	src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom JavaScript -->
+<script src="/scripts.js"></script>
 <script>
 	$(document).ready(function() {
 		$('[data-toggle="tooltip"]').tooltip();
+
+		// Load content into tabs on click
+		$('.nav-link').on('click', function(e) {
+			e.preventDefault();
+			var target = $(this).attr('href');
+			$(target).load($(this).data('url'));
+			$(this).tab('show');
+		});
+
+		// Manually trigger the click event to load the default tab content
+		$('#maintenance-dashboard-tab').trigger('click');
 	});
+	
 </script>
 <style>
 body, html {
@@ -59,79 +75,45 @@ body, html {
 
 .tab-content {
 	flex: 1; /* Fill remaining vertical space */
-	overflow: hidden; /* Hide overflow */
-	position: relative; /* Position content absolutely */
+	overflow: auto; /* Allow scrolling */
 }
 
 .tab-pane {
-	position: absolute; /* Position tabs absolutely */
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-}
-
-.tab-pane iframe {
-	width: 100%;
-	height: 100%;
-	border: none;
+	padding: 20px; /* Add some padding */
 }
 </style>
 </head>
 <body>
 
-<h1>Welcome to Thymeleaf with Spring Security</h1>
-
-<div align="center">	
-	<div sec:authorize="isAuthenticated()">
-		Welcome <b><span sec:authentication="name">Username</span></b>
-		&nbsp;
-		<i><span sec:authentication="principal.authorities">Roles</span></i>
-	</div>
-
-    <div sec:authorize="hasRole('MEMBER')">
-        <p>This content is only visible to users with the ROLE_USER role.</p>
-    </div>
-
-    <div sec:authorize="hasRole('ADMIN')">
-        <p>This content is only visible to users with the ROLE_ADMIN role.</p>
-    </div>
-
-    <div sec:authorize="isAuthenticated()">
-        <p>This content is only visible to authenticated users.</p>
-    </div>
-
-    <div sec:authorize="isAnonymous()">
-        <p>This content is only visible to anonymous users.</p>
-    </div>
-
-	<div class="container-fluid">
+<!-- <span sec:authentication="principal.authorities">[ROLE_USER, ROLE_ADMIN]</span>
+ -->	<div class="container-fluid">
+ <div class="table-responsive">
 		<ul class="nav nav-tabs" id="myTab" role="tablist">
 			<li class="nav-item"><a class="nav-link active"
 				id="maintenance-dashboard-tab" data-toggle="tab"
 				href="#maintenance-dashboard" role="tab"
-				aria-controls="maintenance-dashboard" aria-selected="true">Maintenance
-					Dashboard</a></li>
+				aria-controls="maintenance-dashboard" aria-selected="true"
+				data-url="/maintenanceDashboard">Maintenance Dashboard</a></li>
 			<li class="nav-item"><a class="nav-link"
 				id="maintenance-entry-tab" data-toggle="tab"
 				href="#maintenance-entry" role="tab"
-				aria-controls="maintenance-entry" aria-selected="false">Maintenance
-					Entry</a></li>
-			<li class="nav-item"><a class="nav-link"
-				id="add-extra-charges-tab" data-toggle="tab"
+				aria-controls="maintenance-entry" aria-selected="false"
+				data-url="/maintenance-entry">Maintenance Entry</a></li>
+			<li class="nav-item" sec:authorize="hasRole('ADMIN')"><a
+				class="nav-link" id="add-extra-charges-tab" data-toggle="tab"
 				href="#add-extra-charges" role="tab"
-				aria-controls="add-extra-charges" aria-selected="false">Add
-					Extra Charges</a></li>
+				aria-controls="add-extra-charges" aria-selected="false"
+				data-url="/add-extra-charges">Add Extra Charges</a></li>
 			<li class="nav-item"><a class="nav-link" id="grid-view-tab"
 				data-toggle="tab" href="#grid-view" role="tab"
-				aria-controls="grid-view" aria-selected="false">Grid View</a></li>
+				aria-controls="grid-view" aria-selected="false"
+				data-url="/grid-view">Grid View</a></li>
 
 			<!-- Display the user's role -->
 			<li class="nav-item">
 				<button type="submit" class="btn btn-info"
 					style="margin-right: 10px;">
-					<span data-toggle="tooltip" title="You are logged in as"
-						th:text="${session.userRoleModified}"></span>
+						<span id="userName" class="exclude-style" data-toggle="tooltip" title="You are logged in as" sec:authentication="name"></span>
 				</button>
 			</li>
 
@@ -142,31 +124,27 @@ body, html {
 						style="margin-left: 10px;">Logout</button>
 				</form>
 			</li>
-
 		</ul>
 		<div class="tab-content mt-2" id="myTabContent">
 			<!-- Content panes for each tab -->
 			<div class="tab-pane fade show active" id="maintenance-dashboard"
 				role="tabpanel" aria-labelledby="maintenance-dashboard-tab">
-				<!-- Content of maintenanceDashboard.html will be loaded here -->
-				<iframe src="maintenanceDashboard.html"></iframe>
+				<!-- Content will be loaded here -->
 			</div>
 			<div class="tab-pane fade" id="maintenance-entry" role="tabpanel"
 				aria-labelledby="maintenance-entry-tab">
-				<!-- Content of maintenance-entry.html will be loaded here -->
-				<iframe src="maintenance-entry.html"></iframe>
+				<!-- Content will be loaded here -->
 			</div>
 			<div class="tab-pane fade" id="add-extra-charges" role="tabpanel"
 				aria-labelledby="add-extra-charges-tab">
-				<!-- Content of add-extra-charges.html will be loaded here -->
-				<iframe src="add-extra-charges.html"></iframe>
+				<!-- Content will be loaded here -->
 			</div>
 			<div class="tab-pane fade" id="grid-view" role="tabpanel"
 				aria-labelledby="grid-view-tab">
-				<!-- Content of grid-view.html will be loaded here -->
-				<iframe src="grid-view.html"></iframe>
+				<!-- Content will be loaded here -->
 			</div>
 		</div>
+	</div>
 	</div>
 </body>
 </html>

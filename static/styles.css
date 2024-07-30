@@ -1,0 +1,209 @@
+/* Define color variables */
+:root {
+    --primary-color: #008b8b; /* Hover background color */
+    --secondary-color: #ff7f50; /* Active tab background color */
+    --default-text-color: #666; /* Default tab text color */
+    --hover-text-color: #fff; /* Hover text color */
+    --background-color: #f0f0f0; /* Default tab background */
+    --grid-background-color: #ffffff; /* Grid background color */
+    --grid-item-background-color: #f1f1f1; /* Grid item background color */
+    --zero-outstanding-background: #e0f7fa; /* Zero outstanding background */
+    --zero-outstanding-border: #008080; /* Zero outstanding border */
+    --non-zero-outstanding-background: #ffe0e0; /* Non-zero outstanding background */
+    --non-zero-outstanding-border: #e60000; /* Non-zero outstanding border */
+}
+
+/* General styles */
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevents scrollbars */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 20px;
+}
+
+.container-fluid {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.nav-tabs {
+    justify-content: center;
+    border-bottom: none; /* Remove default bottom border */
+    background-color: var(--background-color); /* Background color for tabs */
+    padding: 10px 0; /* Adjust top and bottom padding */
+}
+
+.nav-tabs .nav-link {
+    color: var(--default-text-color); /* Default tab text color */
+    border: none; /* Remove border */
+    background-color: var(--background-color); /* Default tab background */
+    margin-right: 10px; /* Adjust spacing between tabs */
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--hover-text-color); /* Hover text color */
+    background-color: var(--primary-color); /* Hover background color */
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--hover-text-color); /* Active tab text color */
+    background-color: var(--secondary-color); /* Active tab background color */
+}
+
+.tab-content {
+    flex: 1; /* Fill remaining vertical space */
+    overflow: auto; /* Allow scrolling */
+}
+
+.tab-pane {
+    padding: 20px; /* Add some padding */
+}
+
+
+.container {
+    width: auto; /* Allow container to shrink based on content */
+    max-width: 100%; /* Ensure it doesn't exceed the viewport width */
+    min-width: 300px; /* Prevent it from becoming too narrow */
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 columns */
+    grid-template-rows: repeat(4, 1fr); /* 4 rows */
+    gap: 10px; /* Increased gap between blocks */
+    padding: 10px;
+    margin-top: 20px; /* Move grid slightly down */
+    margin-bottom: 20px; /* Add margin at the bottom */
+    border: 2px solid #ddd; /* Border around grid */
+    border-radius: 10px; /* Rounded corners */
+    background-color: var(--grid-background-color); /* White background */
+}
+
+.grid-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; /* Center content horizontally */
+    font-size: 16px;
+    font-weight: bold;
+    color: #444; /* Text color */
+    background-color: var(--grid-item-background-color); /* Light gray background */
+    height: 100px; /* Fixed height for each block */
+    padding: 10px;
+    border: 2px solid #ddd; /* Border around each block */
+    border-radius: 10px; /* Rounded corners */
+    transition: transform 0.3s, box-shadow 0.3s; /* Smooth transition for hover effect */
+    position: relative; /* Position relative for absolute positioning of message */
+}
+
+.grid-item:hover {
+    transform: scale(1.05); /* Slightly increase size on hover */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Add shadow on hover */
+}
+
+.grid-item span.flat-number {
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.grid-item span.outstanding-amount {
+    font-weight: bold;
+    margin-top: 5px; /* Adjust margin for amount */
+    font-size: 18px; /* Larger font size for amount */
+    color: var(--zero-outstanding-border); /* Teal color for outstanding amount */
+}
+
+.zero-outstanding {
+    background-color: var(--zero-outstanding-background); /* Light teal background for zero outstanding */
+    border-color: var(--zero-outstanding-border); /* Teal border for zero outstanding */
+}
+
+.non-zero-outstanding {
+    background-color: var(--non-zero-outstanding-background); /* Light pink background for non-zero outstanding */
+    border-color: var(--non-zero-outstanding-border); /* Red border for non-zero outstanding */
+}
+
+.details-msg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #b22222; /* Firebrick color for message */
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+    display: none; /* Initially hidden */
+}
+
+.zero-outstanding .details-msg {
+    display: block; /* Show message only for zero outstanding */
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse; /* Collapse borders to avoid double borders */
+    margin-top: 20px; /* Add space above the table */
+    background-color: #ffffff; /* White background for the table */
+}
+
+th, td {
+    border: 1px solid #ddd; /* Light gray border for table cells */
+    padding: 10px; /* Add padding inside table cells */
+    text-align: left; /* Align text to the left */
+}
+
+th {
+    background-color: var(--primary-color); /* Background color for table headers */
+    color: #fff; /* White text color for table headers */
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9; /* Alternating row background color */
+}
+
+tr:hover {
+    background-color: #f1f1f1; /* Highlight row on hover */
+}
+
+@media (max-width: 992px) {
+    .grid-container {
+        grid-template-columns: repeat(4, 1fr); /* Adjust columns for tablets */
+        grid-template-rows: repeat(7, 1fr); /* Adjust rows for tablets */
+    }
+}
+
+@media (max-width: 576px) {
+    .grid-container {
+        grid-template-columns: repeat(2, 1fr); /* Adjust columns for mobile */
+        grid-template-rows: repeat(14, 1fr); /* Adjust rows for mobile */
+    }
+
+    .grid-item {
+        height: 80px; /* Adjust height for mobile */
+        font-size: 14px; /* Adjust font size for mobile */
+    }
+
+    .grid-item span.outstanding-amount {
+        font-size: 16px; /* Adjust font size for amount */
+    }
+}

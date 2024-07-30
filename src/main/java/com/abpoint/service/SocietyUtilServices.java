@@ -24,6 +24,9 @@ public class SocietyUtilServices {
 	@Autowired
 	MaintenanceMasterEntryRepo maintenanceMasterEntryRepo;
 
+	@Autowired
+	SocietyService serviceSociety;
+	
 	public double getExtraCharges(int flatNumber) {
 
 		Optional<Double> extraCharges = Optional
@@ -72,6 +75,13 @@ public class SocietyUtilServices {
 			throw new Exception("Error while getting financial year for given date");
 		}
 		return startYear + "-" + String.valueOf(endYear).substring(2);
+	}
+
+	public ResponseEntity<String> getFlatType(int flatNumber) throws Exception {
+		Optional<String> flatType = Optional
+				.ofNullable(serviceSociety.getFlatType(flatNumber));
+
+		return ResponseEntity.ok().body(flatType.get());
 	}
 
 }
