@@ -43,11 +43,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable().authorizeRequests().antMatchers("/public/**", "/api/**").permitAll()
+		http.cors().and().csrf().disable().authorizeRequests().antMatchers("/public/**", "/api/**").permitAll()
 				// Allow access to the static resources
-				.antMatchers("/css/**", "/js/**", "/images/**").permitAll()
+				.antMatchers("/css/**", "/js/**", "/images/**").authenticated()
 				.antMatchers("/maintenanceDashboard", "/maintenance-entry", "/saveExtraCharges", "/add-extra-charges",
-						"/grid-view")
+						"/grid-view","/unapproved-payments","/maintenance-charges","/getAllExtraCharges","/saveEditedChanges")
 				.permitAll()// .hasAnyRole("USER", "ADMIN")
 				.antMatchers("/saveExtraCharges").permitAll().antMatchers("/admin/**").hasRole("ADMIN").anyRequest()
 				.authenticated().and().formLogin().loginPage("/login").defaultSuccessUrl("/index", true)

@@ -9,7 +9,6 @@ public class MaintenanceDashboardEntry {
 	private double annualMaintenance;
 	private double extraCharges;
 	private double totalOutstanding;
-
 	public String getFlatType() {
 		return flatType;
 	}

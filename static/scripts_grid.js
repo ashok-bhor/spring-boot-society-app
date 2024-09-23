@@ -1,6 +1,6 @@
 $(document).ready(function() {
 	
-    fetch('http://localhost:8080/getOutstandingList')
+    fetch('/getOutstandingList')
         .then(response => response.json())
         .then(data => {
             //console.log(data); // Log the data to inspect its structure
@@ -29,7 +29,6 @@ $(document).ready(function() {
             gridItem.innerHTML = `
                 <span class="flat-number">Flat ${flatNumber}</span>
                 <span class="outstanding-amount">₹${flat ? flat.outstandingAmount.toFixed(2) : '0.00'}</span>
-                <div class="details-msg">Details yet to onboard!</div>
             `;
 
             gridContainer.appendChild(gridItem);

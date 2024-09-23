@@ -1,36 +1,49 @@
 package com.abpoint.service;
 
 import java.sql.Date;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.abpoint.extra.charges.service.ExtraChargesServices;
+import com.abpoint.model.ApprovalPendingPayment;
+import com.abpoint.model.DeletedExtraCharges;
 import com.abpoint.model.ExtraChargesEntry;
 import com.abpoint.model.MaintenanceDashboardCard;
 import com.abpoint.model.MaintenanceDashboardEntry;
 import com.abpoint.model.MaintenanceMasterEntry;
 import com.abpoint.model.SocietyMaintenanceEntry;
 import com.abpoint.model.SocietyMaintenancePaidHistory;
+import com.abpoint.repository.ApprovalPendingPaymentRepository;
+import com.abpoint.repository.DeleteExtraChargesRepository;
 import com.abpoint.repository.ExtraChargesEntryRepository;
 import com.abpoint.repository.FlatTypeFlatNumberMapRepository;
 import com.abpoint.repository.MaintenanceMasterEntryRepo;
 import com.abpoint.repository.MaintenanceValuesRepository;
-import com.abpoint.repository.SocietyMaintenanceEntryRepository;
+import com.abpoint.repository.MaintenanceValuesRepository2;
 import com.abpoint.repository.SocietyMaintenancePaidHistoryRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+@Slf4j
 //defining the business logic
 @Service
 public class SocietyService {
-	@Autowired
-	private SocietyMaintenanceEntryRepository societyMaintenanceEntryRepository;
-
+	
 	@Autowired
 	private SocietyMaintenancePaidHistoryRepository repositoryMaintenancePaidHistory;
 
@@ -47,386 +60,298 @@ public class SocietyService {
 	ExtraChargesEntryRepository extraChargesEntryRepository;
 
 	@Autowired
+	DeleteExtraChargesRepository deleteExtraChargesRepository;
+
+	@Autowired
 	SocietyUtilServices societyUtilServices;
 
-//getting all books record by using the method findaAll() of CrudRepository
-	public List<SocietyMaintenanceEntry> getAllSocietyMaintenanceEntries() {
-		List<SocietyMaintenanceEntry> sme = new ArrayList<SocietyMaintenanceEntry>();
-		societyMaintenanceEntryRepository.findAll().forEach(sme1 -> sme.add(sme1));
-		return sme;
-	}
+	@Autowired
+	ApprovalPendingPaymentRepository approvalPendingPaymentRepository;
 
-	void updateMasterEntry(int flatNumber, double amountToDeduct) throws Exception {
+	@Autowired
+	PaymentApprovalService approvalService;
+	
+	@Autowired
+	ExtraChargesServices extraChargesServices;
+
+	@Autowired
+	MaintenanceValuesRepository2 maintenanceValuesRepository2;
+	
+	private static final Logger logger = LoggerFactory.getLogger(SocietyService.class);
+
+	@Transactional
+	public void updateMasterEntry(int flatNumber, double amountToDeduct) {
 		try {
-			// MAINTENANCEMASTERENTRY
-			Optional<MaintenanceMasterEntry> masterEntry = Optional.ofNullable(getMasterEntry(flatNumber));
+			// Retrieve the existing master entry
+			MaintenanceMasterEntry masterEntryExisting = getMasterEntry(flatNumber);
 
-			if (masterEntry.isPresent()) {
-				MaintenanceMasterEntry masterEntryExisting = masterEntry.get();
-				Double recievedTillNow = Optional.ofNullable(repositoryMaintenancePaidHistory.getPaidAmountTillNow(flatNumber)).orElse(0.0);
+			if (masterEntryExisting != null) {
+				// Calculate received amount
+				double receivedTillNow = Optional
+						.ofNullable(repositoryMaintenancePaidHistory.getPaidAmountTillNow(flatNumber)).orElse(0.0);
 
+				//receivedTillNow = receivedTillNow-amountToDeduct;
+		
+				// Retrieve necessary data
 				String flatType = getFlatType(flatNumber);
 				String latestFinancialYear = getLatestYear();
-				double totalOutstanding = getOutstandingTillFinancialYear(latestFinancialYear, flatType, flatNumber)
-						- recievedTillNow;
-				Date lastestDateUndeleted = repositoryMaintenancePaidHistory.findLatestReceivedDate(flatNumber);
-				System.out.println("recievedTillNow----------:" + recievedTillNow);
+				double outstandingTillDate = masterEntryExisting.getTotalOutstanding(); // getOutstandingTillFinancialYear(latestFinancialYear, flatType, flatNumber);
+				double totalOutstanding = outstandingTillDate - amountToDeduct;
+				Date latestDateUndeleted = repositoryMaintenancePaidHistory.findLatestReceivedDate(flatNumber);
 
-				System.out.println("totalOutstanding---------:" + totalOutstanding);
-				
-				masterEntryExisting.getCurrentYear();
-
+				// Update master entry
 				masterEntryExisting.setTotalOutstanding(totalOutstanding);
-				masterEntryExisting.setReceivedTillNow(recievedTillNow);
-				masterEntryExisting.setLastRecievedDate(lastestDateUndeleted);
+				masterEntryExisting.setReceivedTillNow(receivedTillNow);
+				masterEntryExisting.setLastRecievedDate(latestDateUndeleted);
 
+				// Save updated master entry
 				repositoryMaintenanceMasterEntry.save(masterEntryExisting);
 
+				// Set and update current year
 				String nearestYear = getNearestYear(latestFinancialYear, flatNumber, flatType);
 				masterEntryExisting.setCurrentYear(nearestYear);
 				repositoryMaintenanceMasterEntry.save(masterEntryExisting);
+
+				logger.info(
+						"Updated master entry for flat number: {}. Total Outstanding: {}, Received Till Now: {}, Last Received Date: {}",
+						flatNumber, totalOutstanding, receivedTillNow, latestDateUndeleted);
+			} else {
+				logger.warn("No master entry found for flat number: {}", flatNumber);
 			}
 		} catch (Exception e) {
-			throw new Exception("Error occured while updating MasterEntry. " + e.getMessage());
+			logger.error("Error occurred while updating master entry for flat number: {}. Error: {}", flatNumber,
+					e.getMessage(), e);
+			throw new RuntimeException("Error occurred while updating MasterEntry. " + e.getMessage(), e);
 		}
 	}
 
-	public ResponseEntity<String> editPaidHistory(SocietyMaintenancePaidHistory societyMaintenancePaidHistory)
-			throws Exception {
 
+	@Transactional
+	public ResponseEntity<String> editPaidHistory(SocietyMaintenancePaidHistory societyMaintenancePaidHistory) {
 		Long id = societyMaintenancePaidHistory.getId();
-		
 		try {
-			Optional<SocietyMaintenancePaidHistory> smphExistingOptional = Optional.ofNullable(repositoryMaintenancePaidHistory.findByIdAndDeletedFalse(id));
-			
-			if (smphExistingOptional.isPresent()) {
-				SocietyMaintenancePaidHistory societyMaintenancePaidHistoryExisting = smphExistingOptional.get();
-				if (societyMaintenancePaidHistory.equals(societyMaintenancePaidHistoryExisting)) {
-					String msg = "Tried to save the existing record";
-					System.out.println(msg);
+			// Check if the record already exists and is not deleted
+			Optional<SocietyMaintenancePaidHistory> existingHistoryOptional = Optional
+					.ofNullable(repositoryMaintenancePaidHistory.findByIdAndDeletedFalse(id));
+
+			if (existingHistoryOptional.isPresent()) {
+				SocietyMaintenancePaidHistory existingHistory = existingHistoryOptional.get();
+				// Check if the new data is identical to the existing data
+				if (societyMaintenancePaidHistory.equals(existingHistory)) {
+					String msg = "Tried to save the existing record.";
+					logger.info(msg);
 					return ResponseEntity.ok(msg);
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.badRequest().body("Error while checking exsiting entry!");
+			logger.error("Error while checking existing entry!", e);
+			return ResponseEntity.badRequest().body("Error while checking existing entry!");
 		}
-		
-		
+
 		try {
+			// Soft delete the old record and save the new record
 			softDeletePaidHistory(id, "Edited");
 			repositoryMaintenancePaidHistory.save(societyMaintenancePaidHistory);
-			System.out.println("Successfully saved updated paid history.");
-			
-			updateMasterEntry(societyMaintenancePaidHistory.getFlatNumber(), societyMaintenancePaidHistory.getAmount());
+			logger.info("Successfully saved updated paid history.");
 
-			System.out.println("Successfully updated the master data.");
+			// Update the master entry
+			updateMasterEntry(societyMaintenancePaidHistory.getFlatNumber(), societyMaintenancePaidHistory.getAmount());
+			logger.info("Successfully updated the master data.");
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error while saving edited entry!", e);
 			return ResponseEntity.badRequest().body("Error while saving edited entry!");
 		}
 
-		return ResponseEntity.ok().body("Successfully edited.");
+		return ResponseEntity.ok("Successfully edited.");
 	}
 
-	public ResponseEntity<String> softDeletePaidHistory(Long id, String deleteReason) throws Exception {
-		System.out.println("SocietyService.softDeletePaidHistory()");
-		String msg = "Error while deleting entry!";
-		try {
-			Optional<SocietyMaintenancePaidHistory> optionalHistory = repositoryMaintenancePaidHistory.findById(id);
-			// Update Paid history table
-			if (optionalHistory.isPresent()) {
-				SocietyMaintenancePaidHistory history = optionalHistory.get();
-				int flatNumber = history.getFlatNumber();
-				double amountToDeduct = history.getAmount();
-				history.setDeleted(true);
-				history.setDeletedReason(deleteReason);
-				repositoryMaintenancePaidHistory.save(history);
+	@Transactional
+	public ResponseEntity<String> softDeletePaidHistory(Long id, String deleteReason) {
+	    String msg = "Error while deleting entry!";
+	    logger.info("Attempting to soft delete entry with ID: {}", id);
 
-				updateMasterEntry(flatNumber, amountToDeduct);
+	    try {
+	        Optional<SocietyMaintenancePaidHistory> optionalHistory = repositoryMaintenancePaidHistory.findById(id);
 
-				return ResponseEntity.ok().body("Successfully deleted.");
+	        if (optionalHistory.isPresent()) {
+	            SocietyMaintenancePaidHistory history = optionalHistory.get();
+	            int flatNumber = history.getFlatNumber();
+	            double amountToDeduct = history.getAmount();
+
+	            logger.info("Entry found for ID: {}. Flat Number: {}, Amount: {}", id, flatNumber, amountToDeduct);
+
+	            history.setDeleted(true);
+	            history.setDeletedReason(deleteReason);
+	            repositoryMaintenancePaidHistory.save(history);
+
+	            logger.info("Entry with ID: {} marked as deleted. Reason: {}", id, deleteReason);
+
+	            updateMasterEntry(flatNumber, -amountToDeduct);
+
+	            logger.info("Master entry updated for Flat Number: {}. Amount deducted: {}", flatNumber, amountToDeduct);
+
+	            return ResponseEntity.ok("Successfully deleted.");
+	        } else {
+	            logger.warn("No entry found for ID: {}", id);
+	        }
+	    } catch (Exception e) {
+	        logger.error("Error while deleting entry with ID {}: {}", id, e.getMessage(), e);
+	    }
+
+	    logger.error("Failed to delete entry with ID: {}", id);
+	    return ResponseEntity.badRequest().body(msg);
+	}
+
+
+	@Transactional
+	public ResponseEntity<ApprovalPendingPayment> saveAsApproved(Long id, Map<String, String> actionDetails)
+			throws Exception {
+
+		Optional<ApprovalPendingPayment> pendingPaymentOptional = approvalPendingPaymentRepository.findById(id);
+
+		if (pendingPaymentOptional.isEmpty()) {
+			logger.warn("The payment id passed is not present in Unapproved list. Payment id: {}", id);
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+		}
+
+		ApprovalPendingPayment pendingPayment = pendingPaymentOptional.get();
+		logger.info("Payment found with Id: {}. Approving details: {}", id, pendingPayment);
+
+		Optional<SocietyMaintenancePaidHistory> existingEntry =null;
+		try { 
+			// Check if an entry with the same parameters already exists
+			existingEntry= repositoryMaintenancePaidHistory.findHistoryByParameters(
+					pendingPayment.getFlatNumber(), pendingPayment.getTransactionId(),
+					pendingPayment.getAmount(), pendingPayment.getPaymentMethod(),
+					pendingPayment.getDate());
+
+			if (existingEntry.isPresent()) { // Entry already exists, handle accordingly
+				logger.error("Entry with flat number " + pendingPayment.getFlatNumber() + " and transaction ID "
+						+ pendingPayment.getTransactionId() + " already exists.");
+				return ResponseEntity.status(HttpStatus.CONFLICT).body(pendingPayment); // 409 Conflict
 			}
 		} catch (Exception e) {
+			logger.error("Error while saving Pending Payment.");
 			e.printStackTrace();
-			return ResponseEntity.badRequest().body(msg);
+			return ResponseEntity.badRequest().body(pendingPayment);
 		}
 
-		return ResponseEntity.badRequest().body(msg);// Or throw an exception if required
-	}
+		int flatNumber = pendingPayment.getFlatNumber();
+		String flatType = getFlatType(flatNumber);
+		String latestFinancialYear = getLatestYear();
+		String nearestYear = getNearestYear(latestFinancialYear, flatNumber, flatType);
+		double receivedTillNowToUpdate = getReceivedTillNowByFlatNumber(flatNumber);
+		double annualMaintenance = getAnnualMaintenanceByFlatNumber(flatNumber);
+		double outstandingTillFinancialYear = getOutstandingTillFinancialYear(latestFinancialYear, flatType,
+				flatNumber);
+		String financialYearOfDate = societyUtilServices.getFinancialYearOfDate(pendingPayment.getDate());
 
-	// saving a specific record by using the method save() of CrudRepository
-	public ResponseEntity<SocietyMaintenanceEntry> saveOrUpdate(SocietyMaintenanceEntry sme) throws Exception {
-
-		System.out.println("In Saving : " + sme);
-		double receivedTillNowToUpdate = sme.getReceivedTillNow(); // If the record is new else new value be calculated
-
-		int flatNumber = sme.getFlatNumber();// .
-		String flatType = getFlatType(flatNumber);// .
-		String latestFinancialYear = getLatestYear();// .
-		String nearestYear = getNearestYear(latestFinancialYear, flatNumber, flatType);// .
-
-		double annualMaintenance = getAnnualMaintenanceByFlatNumber(flatNumber);// .
-		double outstandingMaintenance = getOutstandingTillFinancialYear(latestFinancialYear, flatType, flatNumber);// .
-		double paidAmountForYear = 0;
-		String financialYearOfDate = societyUtilServices.getFinancialYearOfDate(sme.getDate());// .
-		SocietyMaintenancePaidHistory maintenancePaidHistory = new SocietyMaintenancePaidHistory();// .
-
+		SocietyMaintenancePaidHistory maintenancePaidHistory = new SocietyMaintenancePaidHistory();
+		maintenancePaidHistory.setId(id);
 		maintenancePaidHistory.setFlatType(flatType);
 		maintenancePaidHistory.setFlatNumber(flatNumber);
-		maintenancePaidHistory.setAmount(sme.getAmount());
-		maintenancePaidHistory.setTransactionId(sme.getTransactionId());
-		maintenancePaidHistory.setDate(sme.getDate());
+		maintenancePaidHistory.setAmount(pendingPayment.getAmount());
+		maintenancePaidHistory.setTransactionId(pendingPayment.getTransactionId());
+		maintenancePaidHistory.setDate(pendingPayment.getDate());
 		maintenancePaidHistory.setAnnualMaintenance(annualMaintenance);
-		// maintenancePaidHistory.setYear(sme.getYear());
 		maintenancePaidHistory.setYear(financialYearOfDate);
-		maintenancePaidHistory.setPaymentMethod(sme.getPaymentMethod());
-		maintenancePaidHistory.setVerified(sme.isVerified());
+		maintenancePaidHistory.setPaymentMethod(pendingPayment.getPaymentMethod());
 
-		try {
-			paidAmountForYear = getPaidAmountForYear(flatNumber, sme.getYear());// .
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		double outstandingTillFinancialYear = getOutstandingTillFinancialYear(getLatestYear(), flatType, flatNumber);// .
-		// Optional<SocietyMaintenanceEntry> smeExistingOptional =
-		// Optional.ofNullable(getSmeById(sme.getFlatNumber()));
-		Optional<MaintenanceMasterEntry> masterEntry = Optional.ofNullable(getMasterEntry(sme.getFlatNumber()));
+		Optional<MaintenanceMasterEntry> masterEntryOptional = Optional.ofNullable(getMasterEntry(flatNumber));
 
-		double outstandingToUpdate = 0.0;
+		double outstandingToUpdate;
 		double extraCharges = 0.0;
 
-		try {
-			// At first check any extra charges, if charges are zero the outstanding will be
-			// zero
-			extraCharges = societyUtilServices.getExtraCharges(flatNumber);
-		} catch (Exception e) {
-			System.out.println("Error while fetching extra charges");
-		}
-
-		if (masterEntry.isPresent()) {
-			MaintenanceMasterEntry masterEntryExisting = masterEntry.get();
-			// Received Till Now
+		if (masterEntryOptional.isPresent()) {
+			MaintenanceMasterEntry masterEntryExisting = masterEntryOptional.get();
+			logger.info("Existing Master entry fetched: "+ masterEntryExisting);
 			double receivedTillNowExist = masterEntryExisting.getReceivedTillNow();
-			receivedTillNowToUpdate = sme.getAmount() + receivedTillNowExist;
-
-			// OutStanding is outstandingMaintenance-> calculated maintenance
-			outstandingToUpdate = outstandingMaintenance - (sme.getPreviousOutstanding() + sme.getAmount());
-
-			// Paid amount In year
-			System.out.println("paidAmountForYear:" + paidAmountForYear);
-			System.out.println("smeExisting paidAmountForYear: " + sme.getPaidInYear());
-			sme.setPaidInYear(paidAmountForYear + sme.getAmount());
-
-			sme.setPreviousOutstanding(outstandingToUpdate);
-
-			System.out.println("After change: " + sme);
+			receivedTillNowToUpdate = pendingPayment.getAmount() + receivedTillNowExist;
+			outstandingToUpdate = outstandingTillFinancialYear - pendingPayment.getAmount();
+			extraCharges=masterEntryExisting.getChargedAmount();
 		} else {
-			receivedTillNowToUpdate = sme.getAmount();
-			outstandingToUpdate = outstandingTillFinancialYear - sme.getAmount();
-
-			sme.setPaidInYear(sme.getAmount());
-			sme.setPreviousOutstanding(outstandingMaintenance - sme.getAmount());
-			System.out.println("sme: " + sme);
-			System.out.println("New Id to be created. SME Record: " + sme);
+			logger.info("No exisiting master entry found for flat number: "+ flatNumber);
+			receivedTillNowToUpdate = pendingPayment.getAmount();
+			outstandingToUpdate = outstandingTillFinancialYear - pendingPayment.getAmount();
 		}
 
-		// Add any extra charges
-		outstandingToUpdate = outstandingToUpdate + extraCharges;
+		outstandingToUpdate += extraCharges;
 
-		// Paid till Year
-		sme.setPaidTillYear(nearestYear);
-		sme.setAnnualMaintenance(annualMaintenance);
-		sme.setFlatType(getFlatType(flatNumber));
-		sme.setReceivedTillNow(receivedTillNowToUpdate);
-		sme.setYear(financialYearOfDate);
-		
-		
-		//double extraCharges = extraChargesEntryRepository.sumChargedAmountByFlatNumber(flatNumber);
 		MaintenanceMasterEntry maintenanceMasterEntry = new MaintenanceMasterEntry();
+		
 		maintenanceMasterEntry.setFlatNumber(flatNumber);
 		maintenanceMasterEntry.setCurrentYear(nearestYear);
-		maintenanceMasterEntry.setLastRecievedDate(sme.getDate());
+		maintenanceMasterEntry.setLastRecievedDate(pendingPayment.getDate());
 		maintenanceMasterEntry.setReceivedTillNow(receivedTillNowToUpdate);
 		maintenanceMasterEntry.setChargedAmount(extraCharges);
 		maintenanceMasterEntry.setTotalOutstanding(outstandingToUpdate);
 
-		// Not needed
 		try {
-			System.out.println("Saving data to societyRepositoryEntry ");
-			societyMaintenanceEntryRepository.save(sme);
-		} catch (Exception e) {
-			System.out.println("Error Occured while updating societyRepositoryEntry");
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(sme);
-		}
-		try {
-			System.out.println("Saving data to maintenanceMasterEntry ");
+			logger.info("Saving data to maintenanceMasterEntry");
 			repositoryMaintenanceMasterEntry.save(maintenanceMasterEntry);
 		} catch (Exception e) {
-			System.out.println("Error Occured while updating maintenanceMasterEntry");
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(sme);
+			logger.error("Error occurred while updating maintenanceMasterEntry: {}", e.getMessage(), e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(pendingPayment);
 		}
+
 		try {
-			System.out.println("Saving data to maintenancePaidHistory ");
+			logger.info("Saving data to maintenancePaidHistory");
 			repositoryMaintenancePaidHistory.save(maintenancePaidHistory);
-
 		} catch (Exception e) {
-			System.out.println("Error Occured while updating maintenancePaidHistory");
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(sme);
+			logger.error("Error occurred while updating maintenancePaidHistory: {}", e.getMessage(), e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(pendingPayment);
 		}
 
-		return ResponseEntity.ok(sme);
+		try {
+			logger.info("Removing data from approval pending payments");
+			approvalService.actionPayment(id, actionDetails);
+		} catch (Exception e) {
+			logger.error("Error occurred while removing data from approval pending payments: {}", e.getMessage(), e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(pendingPayment);
+		}
+
+		return ResponseEntity.ok(pendingPayment);
 	}
 
-	// saving a specific record by using the method save() of CrudRepository
-	public ResponseEntity<SocietyMaintenanceEntry> saveOrUpdateOld(SocietyMaintenanceEntry sme) throws Exception {
-
-		System.out.println("In saveOrUpdate.Saving : " + sme);
-		double receivedTillNowToUpdate = sme.getReceivedTillNow(); // If the record is new else new value be calculated
-
-		int flatNumber = sme.getFlatNumber();
-		String flatType = getFlatType(flatNumber);
-		String latestFinancialYear = getLatestYear();
-		String nearestYear = getNearestYear(latestFinancialYear, flatNumber, flatType);
-
-		double annualMaintenance = getAnnualMaintenanceByFlatNumber(flatNumber);
-		double outstandingMaintenance = getOutstandingTillFinancialYear(latestFinancialYear, flatType, flatNumber);
-		double paidAmountForYear = 0;
-		String financialYearOfDate = societyUtilServices.getFinancialYearOfDate(sme.getDate());
-		SocietyMaintenancePaidHistory maintenancePaidHistory = new SocietyMaintenancePaidHistory();
-
-		maintenancePaidHistory.setFlatType(flatType);
-		maintenancePaidHistory.setFlatNumber(flatNumber);
-		maintenancePaidHistory.setAmount(sme.getAmount());
-		maintenancePaidHistory.setTransactionId(sme.getTransactionId());
-		maintenancePaidHistory.setDate(sme.getDate());
-		maintenancePaidHistory.setAnnualMaintenance(annualMaintenance);
-		// maintenancePaidHistory.setYear(sme.getYear());
-		maintenancePaidHistory.setYear(financialYearOfDate);
-		maintenancePaidHistory.setPaymentMethod(sme.getPaymentMethod());
-		maintenancePaidHistory.setVerified(sme.isVerified());
-
+	public List<MaintenanceDashboardCard> getMaintenanceDashboardCardData(int flatNumber) {
 		try {
-			paidAmountForYear = getPaidAmountForYear(flatNumber, sme.getYear());
+			return DashboardMapper.convertToDashboardCards(getMaintenanceDashboardData(flatNumber));
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error while fetching maintenance dashboard card data for flat number: {}", flatNumber, e);
+			// Return an empty list or handle as appropriate
+			return Collections.emptyList();
 		}
-		double outstandingTillFinancialYear = getOutstandingTillFinancialYear(getLatestYear(), flatType, flatNumber);
-		Optional<SocietyMaintenanceEntry> smeExistingOptional = Optional.ofNullable(getSmeById(sme.getFlatNumber()));
-
-		double outstandingToUpdate = 0.0;
-		double extraCharges = 0.0;
-
-		try {
-			// At first check any extra charges, if charges are zero the outstanding will be
-			// zero
-			extraCharges = societyUtilServices.getExtraCharges(flatNumber);
-		} catch (Exception e) {
-			System.out.println("Error while fetching extra charges");
-		}
-
-		if (smeExistingOptional.isPresent()) {
-			SocietyMaintenanceEntry smeExisting = smeExistingOptional.get();
-			// Received Till Now
-			double receivedTillNowExist = smeExisting.getReceivedTillNow();
-			receivedTillNowToUpdate = sme.getAmount() + receivedTillNowExist;
-
-			// OutStanding is outstandingMaintenance-> calculated maintenance
-			outstandingToUpdate = outstandingMaintenance - (sme.getPreviousOutstanding() + sme.getAmount());
-
-			// Paid amount In year
-			System.out.println("paidAmountForYear:" + paidAmountForYear);
-			System.out.println("smeExisting paidAmountForYear: " + sme.getPaidInYear());
-			sme.setPaidInYear(paidAmountForYear + sme.getAmount());
-
-			sme.setPreviousOutstanding(outstandingToUpdate);
-
-			System.out.println("After change: " + sme);
-		} else {
-			receivedTillNowToUpdate = sme.getAmount();
-			outstandingToUpdate = outstandingTillFinancialYear - sme.getAmount();
-
-			sme.setPaidInYear(sme.getAmount());
-			sme.setPreviousOutstanding(outstandingMaintenance - sme.getAmount());
-			System.out.println("sme: " + sme);
-			System.out.println("New Id to be created. SME Record: " + sme);
-		}
-
-		// Add any extra charges
-		outstandingToUpdate = outstandingToUpdate + extraCharges;
-
-		// Paid till Year
-		sme.setPaidTillYear(nearestYear);
-		sme.setAnnualMaintenance(annualMaintenance);
-		sme.setFlatType(getFlatType(flatNumber));
-		sme.setReceivedTillNow(receivedTillNowToUpdate);
-		sme.setYear(financialYearOfDate);
-
-		MaintenanceMasterEntry maintenanceMasterEntry = new MaintenanceMasterEntry();
-		maintenanceMasterEntry.setFlatNumber(flatNumber);
-		maintenanceMasterEntry.setCurrentYear(nearestYear);
-		maintenanceMasterEntry.setLastRecievedDate(sme.getDate());
-		maintenanceMasterEntry.setReceivedTillNow(receivedTillNowToUpdate);
-		maintenanceMasterEntry.setChargedAmount(0.0);
-		maintenanceMasterEntry.setTotalOutstanding(outstandingToUpdate);
-
-		try {
-			System.out.println("Saving data to societyRepositoryEntry ");
-			societyMaintenanceEntryRepository.save(sme);
-		} catch (Exception e) {
-			System.out.println("Error Occured while updating societyRepositoryEntry");
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(sme);
-		}
-		try {
-			System.out.println("Saving data to maintenanceMasterEntry ");
-			repositoryMaintenanceMasterEntry.save(maintenanceMasterEntry);
-		} catch (Exception e) {
-			System.out.println("Error Occured while updating maintenanceMasterEntry");
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(sme);
-		}
-		try {
-			System.out.println("Saving data to maintenancePaidHistory ");
-			repositoryMaintenancePaidHistory.save(maintenancePaidHistory);
-
-		} catch (Exception e) {
-			System.out.println("Error Occured while updating maintenancePaidHistory");
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(sme);
-		}
-
-		return ResponseEntity.ok(sme);
 	}
 
-	
-	public List<MaintenanceDashboardCard> getMaintenanceDashboardCardData(int flatNumber) throws Exception {
-		
-	        return DashboardMapper.convertToDashboardCards(getMaintenanceDashboardData(flatNumber));
-		
-	}
-	
-	// Method to fetch maintenance dashboard data
-	public MaintenanceDashboardEntry getMaintenanceDashboardData(int flatNumber) throws Exception {
+	public MaintenanceDashboardEntry getMaintenanceDashboardData(int flatNumber) {
+		String latestFinancialYear;
+		String flatType;
+		String paidTillYear;
+		double totalPaid;
+		double maintenanceOutstanding;
+		double existingMaintenanceOutstanding;
+		double annualMaintenance;
+		double extraCharges;
+		double totalOutstanding = 0.0;
+		MaintenanceDashboardEntry maintenanceDashboardEntry = new MaintenanceDashboardEntry();
 
-		String latestFinancialYear, flatType, paidTillYear = null;
-
-		double totalPaid, maintenanceOutstanding, annualMaintenance, extraCharges, totalOutstanding = 0.0;
-		MaintenanceDashboardEntry maintenanceDashboardEntry = null;
 		try {
 			latestFinancialYear = getLatestYear();
 			flatType = getFlatType(flatNumber);
 			totalPaid = getReceivedTillNowByFlatNumber(flatNumber);
 			paidTillYear = getNearestYear(latestFinancialYear, flatNumber, flatType);
-			maintenanceOutstanding = getOutstandingTillFinancialYear(latestFinancialYear, flatType, flatNumber);
+			existingMaintenanceOutstanding = getTotalOutstandingByFlatNumber(flatNumber);
+			
+			//If existingMaintenanceOutstanding zero means either it is completely paid or nothing has paid.
+			if (existingMaintenanceOutstanding==0) 
+				maintenanceOutstanding = getOutstandingTillFinancialYear(latestFinancialYear, flatType, flatNumber);
+			else
+				maintenanceOutstanding = existingMaintenanceOutstanding;
+			
 			annualMaintenance = getAnnualMaintenanceByFlatNumber(flatNumber);
-			extraCharges = societyUtilServices.getExtraCharges(flatNumber);
+			extraCharges = extraChargesServices.getExtraCharges(flatNumber);
 			totalOutstanding = maintenanceOutstanding + extraCharges;
 
-			maintenanceDashboardEntry = new MaintenanceDashboardEntry();
 			maintenanceDashboardEntry.setFlatType(flatType);
 			maintenanceDashboardEntry.setTotalPaid(totalPaid);
 			maintenanceDashboardEntry.setExtraCharges(extraCharges);
@@ -435,8 +360,7 @@ public class SocietyService {
 			maintenanceDashboardEntry.setAnnualMaintenance(annualMaintenance);
 			maintenanceDashboardEntry.setTotalOutstanding(totalOutstanding);
 		} catch (Exception e) {
-			System.out.println("Error while getting dashboard data.");
-			return maintenanceDashboardEntry;
+			logger.error("Error while getting dashboard data for flat number: {}", flatNumber, e);
 		}
 
 		return maintenanceDashboardEntry;
@@ -454,12 +378,10 @@ public class SocietyService {
 		List<SocietyMaintenancePaidHistory> historyList = repositoryMaintenancePaidHistory
 				.findByFlatNumberAndDeletedFalse(flatNumber);
 
-		System.out.println("historyList:" + historyList);
-
 		// Sort the list by year
 		historyList.sort(Comparator.comparing(SocietyMaintenancePaidHistory::getYear));
 
-		System.out.println("Sorted list: " + historyList);
+		logger.info("Sorted history list for flat number {}: {}", flatNumber, historyList);
 
 		return historyList;
 	}
@@ -486,30 +408,28 @@ public class SocietyService {
 	}
 
 	public String getNearestYear(String latestFinancialYear, int flatNumber, String flatType) throws Exception {
+		try {
+			double receivedTillNow = getReceivedTillNowByFlatNumber(flatNumber);
 
-		double receivedTillNow = getReceivedTillNowByFlatNumber(flatNumber);
+			Optional<Double> expectedBalanceOptional = Optional.ofNullable(
+					repositoryMaintenanceValues.sumMaintenanceValueByYearAndFlatType(latestFinancialYear, flatType));
 
-		Optional<Double> expectedBalanceOptional = Optional.ofNullable(
-				repositoryMaintenanceValues.sumMaintenanceValueByYearAndFlatType(latestFinancialYear, flatType));
+			double expectedBalance = expectedBalanceOptional.orElse(0.0); // Default value if sum is null
 
-		double expectedBalance = expectedBalanceOptional.orElse(0.0); // Default value if sum is null
-
-		if (expectedBalance == 0) {
-			throw new Exception("Error in calculating expectedBalanceOptional");
-		}
-
-		if (receivedTillNow != 0) {
+			if (expectedBalance == 0) {
+				throw new Exception("Expected balance is zero for the given year and flat type.");
+			}
 
 			if (receivedTillNow >= expectedBalance) {
-
 				return latestFinancialYear;
-
 			} else {
 				return getRespectiveNearestYear(flatType, receivedTillNow, flatNumber);
 			}
-		} else {
-			Optional<String> firstYearOptional = Optional.of(repositoryMaintenanceValues.findFirstYear());
-			return firstYearOptional.get();
+		} catch (Exception e) {
+			// Log the exception for debugging purposes
+			logger.error("Error while calculating the nearest year for flat number {} and flat type {}: {}", flatNumber,
+					flatType, e.getMessage());
+			throw new Exception("Error while determining the nearest year", e);
 		}
 	}
 
@@ -521,24 +441,47 @@ public class SocietyService {
 
 	public Map<String, Object> getRespectiveFinancialYearAndExtraAmount(String flatType, double receivedTillNow,
 			int flatNumber) throws Exception {
-		Map<String, Object> result = repositoryMaintenanceValues.findYearAndExtraAmount(receivedTillNow, flatType);
+		// Initialize result map
+		Map<String, Object> result = new HashMap();
 
-		if (result != null && !result.isEmpty()) {
-			String financialYear = (String) result.get("financialYear");
-			double cumulativeSum = ((Number) result.get("cumulativeSum")).doubleValue();
-			double extraAmount = ((Number) result.get("extraAmount")).doubleValue();
-			System.out.println("Financial Year: " + financialYear);
-			System.out.println("Cumulative Sum : " + cumulativeSum);
-			System.out.println("Extra Amount: " + extraAmount);
-		} else {
-			String financialYear = getFirstYear();
-			double cumulativeSum = receivedTillNow;
-			double extraAmount = getOutstandingTillFinancialYear(financialYear, flatType, flatNumber);
-			result.put("financialYear", financialYear);
-			result.put("cumulativeSum", cumulativeSum);
-			result.put("extraAmount", extraAmount);
-			System.out.println("No matching financial year found");
+		try {
+			// Fetch the respective financial year and extra amount
+			Map<String, Object> fetchedData = maintenanceValuesRepository2.findYearAndExtraAmount(receivedTillNow,
+					flatType);
+
+			if (fetchedData != null && !fetchedData.isEmpty()) {
+				String financialYear = (String) fetchedData.get("financial_year");
+				double cumulativeSum = ((Number) fetchedData.get("cumulative_sum")).doubleValue();
+				double extraAmount = ((Number) fetchedData.get("extra_amount")).doubleValue();
+
+				// Log the values
+				logger.info("Financial Year: {}", financialYear);
+				logger.info("Cumulative Sum: {}", cumulativeSum);
+				logger.info("Extra Amount: {}", extraAmount);
+
+				result.put("financialYear", financialYear);
+				result.put("cumulativeSum", cumulativeSum);
+				result.put("extraAmount", extraAmount);
+			} else {
+				// Default values when no data is found
+				String financialYear = getFirstYear();
+				double cumulativeSum = receivedTillNow;
+				double extraAmount = getOutstandingTillFinancialYear(financialYear, flatType, flatNumber);
+
+				result.put("financialYear", financialYear);
+				result.put("cumulativeSum", cumulativeSum);
+				result.put("extraAmount", extraAmount);
+
+				// Log the absence of matching data
+				logger.warn("No matching financial year found for flatType: {} and receivedTillNow: {}", flatType,
+						receivedTillNow);
+			}
+		} catch (Exception e) {
+			// Log and throw a custom exception
+			logger.error("Error while fetching financial year and extra amount", e);
+			throw new Exception("Error while fetching financial year and extra amount", e);
 		}
+
 		return result;
 	}
 
@@ -548,7 +491,6 @@ public class SocietyService {
 				.of(repositoryMaintenanceValues.sumMaintenanceValueByYearAndFlatType(financialYear, flatType));
 
 		double expectedBalance = expectedBalanceOptional.orElse(0.0); // Default value if sum is null
-
 		double actualPayment = getReceivedTillNowByFlatNumber(flatNumber);
 
 		return expectedBalance - actualPayment;
@@ -560,107 +502,90 @@ public class SocietyService {
 				.getReceivedTillNowByFlatNumber(flatNumber);
 		return receivedTillNowOptional.orElse(0.0);
 	}
+	
+	private double getTotalOutstandingByFlatNumber(int flatNumber) {
 
-	// getting a specific record by using the method findById() of CrudRepository
-	public SocietyMaintenanceEntry getSmeById(int id) throws Exception {
-		System.out.println("In getSmeById.Getting Id : " + id);
-		Optional<SocietyMaintenanceEntry> smeOptional = societyMaintenanceEntryRepository.findById(id);
-
-		return smeOptional.orElse(null);
+		Optional<Double> totalOutstanding = repositoryMaintenanceMasterEntry
+				.getTotalOutstandingByFlatNumber(flatNumber);
+		return totalOutstanding.orElse(0.0);
 	}
 
-	public MaintenanceMasterEntry getMasterEntry(int id) throws Exception {
-		System.out.println("In getSmeById.Getting Id : " + id);
+	public MaintenanceMasterEntry getMasterEntry(int id) {
+		logger.info("Fetching MaintenanceMasterEntry with ID: {}", id);
 		Optional<MaintenanceMasterEntry> masterEntry = repositoryMaintenanceMasterEntry.findById(id);
 
 		return masterEntry.orElse(null);
 	}
 
 	public ExtraChargesEntry addEntry(ExtraChargesEntry entry) {
-
+		if (entry == null) {
+			throw new IllegalArgumentException("Entry cannot be null");
+		}
+		logger.info("Adding ExtraChargesEntry: {}", entry);
 		return extraChargesEntryRepository.save(entry);
 	}
 
-	public double getAnnualMaintenanceByFlatNumber(int flatNumber) throws Exception {
-
-		Optional<Double> annualMaintenanceOptional = repositoryFlatNumberMap
-				.getAnnualMaintenanceByFlatNumber(flatNumber);
-
-		if (annualMaintenanceOptional.isPresent()) {
-			return annualMaintenanceOptional.get();
-		} else
-			throw new Exception("Error while getting the annual maintenance");
+	public double getAnnualMaintenanceByFlatNumber(int flatNumber) {
+		logger.info("Fetching annual maintenance for flat number: {}", flatNumber);
+		return repositoryFlatNumberMap.getAnnualMaintenanceByFlatNumber(flatNumber).orElseThrow(
+				() -> new NoSuchElementException("No annual maintenance found for flat number: " + flatNumber));
 	}
 
-//deleting a specific record by using the method deleteById() of CrudRepository
-	public void delete(int id) {
-		societyMaintenanceEntryRepository.deleteById(id);
+
+	
+
+	public SocietyMaintenanceEntry getSmeByIdResponse(int flatId) throws Exception {
+
+		SocietyMaintenanceEntry entry = getMaintenanceEntry(flatId);
+
+		return entry;
 	}
 
-//updating a record
-	public void update(SocietyMaintenanceEntry sme, int bookid) {
-		societyMaintenanceEntryRepository.save(sme);
-	}
+	private SocietyMaintenanceEntry getMaintenanceEntry(int flatNumber) throws Exception {
+		// Fetch the flat type and annual maintenance for the flat number
+		String flatType = getFlatType(flatNumber);
+		double annualMaintenance = getAnnualMaintenanceByFlatNumber(flatNumber);
 
-	public ResponseEntity<ExtraChargesEntry> saveExtraCharges(ExtraChargesEntry exe) throws Exception {
+		// Retrieve the optional master entry from the repository
+		Optional<MaintenanceMasterEntry> optionalMasterEntry = repositoryMaintenanceMasterEntry.findById(flatNumber);
 
-		try {
-			extraChargesEntryRepository.save(exe);
-		} catch (Exception e) {
-			System.out.println("Error while saving extra charges.");
-			return ResponseEntity.badRequest().body(exe);
-		}
+		SocietyMaintenanceEntry entry;
 
-		Optional<MaintenanceMasterEntry> optionalMme = null;
-		try {
-			optionalMme = repositoryMaintenanceMasterEntry.findById(exe.getFlatNumber());
-		} catch (Exception e) {
-			System.out.println("Error while getting MaintenanceMasterEntry for flat number:" + exe.getFlatNumber());
-			return ResponseEntity.badRequest().body(exe);
-		}
+		// Check if the master entry is present
+		if (optionalMasterEntry.isPresent()) {
+			// Use the master entry to create the SocietyMaintenanceEntry
+			MaintenanceMasterEntry masterEntry = optionalMasterEntry.get();
+			entry = new SocietyMaintenanceEntry(masterEntry);
+		} else {
+			// Master entry not found, perform additional processing
+			try {
+				String latestFinancialYear = getLatestYear();
+				double totalOutstanding = getOutstandingTillFinancialYear(latestFinancialYear, flatType, flatNumber);
+				double receivedTillNow = getReceivedTillNowByFlatNumber(flatNumber);
+				String paidTillYear = getNearestYear(latestFinancialYear, flatNumber, flatType);
 
-		try {
-			if (optionalMme.isPresent()) {
-				System.out.println("Updating extra charges...");
-
-				MaintenanceMasterEntry maintenanceMasterEntry = optionalMme.get();
-				double updateChargedExtraAmount = maintenanceMasterEntry.getChargedAmount() + exe.getAmount();
-				double updateTotalOutstanding = maintenanceMasterEntry.getTotalOutstanding() + exe.getAmount();
-
-				maintenanceMasterEntry.setChargedAmount(updateChargedExtraAmount);
-				maintenanceMasterEntry.setTotalOutstanding(updateTotalOutstanding);
-				repositoryMaintenanceMasterEntry.save(maintenanceMasterEntry);
+				entry = new SocietyMaintenanceEntry();
+				entry.setFlatNumber(flatNumber);
+				entry.setPaidTillYear(paidTillYear);
+				entry.setFlatType(flatType);
+				entry.setTotaloutstandingAmount(totalOutstanding);
+				entry.setAnnualMaintenance(annualMaintenance);
+				entry.setReceivedTillNow(receivedTillNow);
+			} catch (Exception e) {
+				// Log the error and throw a custom exception
+				logger.error("Error while calculating maintenance entry for flat number: {}", flatNumber, e);
+				throw new Exception("Error while calculating maintenance entry", e);
 			}
-		} catch (Exception e) {
-			System.out.println("Error while Updating extra charges...");
-			return ResponseEntity.badRequest().body(exe);
 		}
 
-		return ResponseEntity.ok().body(exe);
+		// Set common properties
+		entry.setFlatType(flatType);
+		entry.setAnnualMaintenance(annualMaintenance);
+
+		// Log the details
+		logger.info("Generating updated details for Master Maintenance: {}", entry);
+
+		return entry;
 	}
 
-	public ResponseEntity<SocietyMaintenanceEntry> getSmeByIdResponse(int flatId) throws Exception {
-		// Create a new instance of SocietyMaintenanceEntry
-		SocietyMaintenanceEntry societyMaintenanceEntry = new SocietyMaintenanceEntry();
-
-		String getFlatType = getFlatType(flatId);
-		String year = getNearestYear(getLatestYear(), flatId, getFlatType);
-		double previousOutstanding = getOutstandingTillFinancialYear(getLatestYear(), getFlatType, flatId);
-		double extraCharges = societyUtilServices.getExtraCharges(flatId);
-		double totalOutstanding = previousOutstanding + extraCharges;
-		double annualMaintenance = getAnnualMaintenanceByFlatNumber(flatId);
-		double receivedTillNow = getReceivedTillNowByFlatNumber(flatId);
-		double paidInYear = getPaidAmountForYear(flatId, year);
-		// Set values using setter methods
-		societyMaintenanceEntry.setFlatNumber(flatId);
-		societyMaintenanceEntry.setYear(year);
-		societyMaintenanceEntry.setFlatType(getFlatType);
-		societyMaintenanceEntry.setPreviousOutstanding(totalOutstanding);
-		societyMaintenanceEntry.setAnnualMaintenance(annualMaintenance);
-		societyMaintenanceEntry.setReceivedTillNow(receivedTillNow);
-		societyMaintenanceEntry.setPaidTillYear(year);
-		societyMaintenanceEntry.setPaidInYear(paidInYear);
-
-		return ResponseEntity.ok().body(societyMaintenanceEntry);
-	}
 }

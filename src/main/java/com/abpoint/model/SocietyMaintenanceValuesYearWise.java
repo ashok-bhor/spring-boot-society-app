@@ -1,17 +1,27 @@
 package com.abpoint.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import org.springframework.beans.factory.annotation.Value;
+
 @Entity
-@Table(name = "society_maintenance_values_year_wise ")
+@Table(name = "society_maintenance_values_year_wise")
 public class SocietyMaintenanceValuesYearWise {
-	@Id
-	int recordNum; 
-	
-	String financialYear;
-	String flatType;
-	double maintenanceValue;
+    @Id
+    private int recordNum;
+
+    @Column(name = "financial_year")
+    private String financialYear;
+
+    @Column(name = "flat_type")
+    private String flatType;
+
+    @Column(name = "maintenance_value")
+    private double maintenanceValue;
+
 	
 	public int getRecordNum() {
 		return recordNum;

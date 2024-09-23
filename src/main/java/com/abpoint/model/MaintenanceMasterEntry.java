@@ -72,4 +72,13 @@ public class MaintenanceMasterEntry {
 		this.chargedAmount = chargedAmount;
 	}
 
+	@Override
+	public String toString() {
+		return "MaintenanceMasterEntry [flatNumber=" + flatNumber + ", currentYear=" + currentYear + ", chargedAmount="
+				+ chargedAmount + ", totalOutstanding=" + totalOutstanding + ", receivedTillNow=" + receivedTillNow
+				+ ", lastRecievedDate=" + lastRecievedDate + "]";
+	}
+	
+	
+
 }

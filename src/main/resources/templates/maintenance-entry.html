@@ -1,194 +1,200 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Society Maintenance Form</title>
-
-<!-- jQuery UI -->
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-
+<script src="script_maintenance-entry.js"></script>
 <style>
 /* Scoped styles */
 .society-maintenance .container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 20px;
+	background-color: #f9f9f9;
+	border-radius: 8px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .society-maintenance h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
+	text-align: center;
+	margin-bottom: 20px;
+	color: #333;
 }
 
 .society-maintenance form div {
-    margin-bottom: 15px;
+	margin-bottom: 15px;
 }
 
 .society-maintenance label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+	display: block;
+	margin-bottom: 5px;
+	font-weight: bold;
 }
 
-.society-maintenance select,
-.society-maintenance input[type="text"],
-.society-maintenance input[type="number"],
-.society-maintenance span {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
+.society-maintenance select, .society-maintenance input[type="text"],
+	.society-maintenance input[type="number"], .society-maintenance span {
+	width: 100%;
+	padding: 8px;
+	margin-bottom: 5px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
 }
 
 .society-maintenance select {
-    background-color: #fff;
+	background-color: #fff;
 }
 
-.society-maintenance input[type="text"]:focus,
-.society-maintenance input[type="number"]:focus,
-.society-maintenance select:focus {
-    border-color: #007bff;
-    outline: none;
+.society-maintenance input[type="text"]:focus, .society-maintenance input[type="number"]:focus,
+	.society-maintenance select:focus {
+	border-color: #007bff;
+	outline: none;
 }
 
 .society-maintenance .flex-row {
-    display: flex;
-    align-items: center;
+	display: flex;
+	align-items: center;
 }
 
-.society-maintenance .flex-row span,
-.society-maintenance .flex-row select {
-    width: auto;
-    margin-right: 10px;
+.society-maintenance .flex-row span, .society-maintenance .flex-row select
+	{
+	width: auto;
+	margin-right: 10px;
 }
 
 .society-maintenance .flex-row label {
-    margin-right: 10px;
-    margin-bottom: 0;
+	margin-right: 10px;
+	margin-bottom: 0;
 }
 
 .society-maintenance .flex-row span {
-    padding: 5px 10px;
-    background-color: #e9ecef;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    text-align: center;
+	padding: 5px 10px;
+	background-color: #e9ecef;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	text-align: center;
 }
 
 .society-maintenance #tooltip {
-    display: none;
-    color: red;
-    margin-left: 10px;
+	display: none;
+	color: red;
+	margin-left: 10px;
+}
+
+#tableContainer {
+	display: none;
 }
 </style>
-<script>
-// Create options and append them to the select element
-		flatNumbers.forEach(number => {
-		    const option = document.createElement('option');
-		    option.value = number;
-		    option.textContent = number;
-		    flatNumber.appendChild(option);
-		});
-	</script>
+
 </head>
 
 <body>
-    <div class="society-maintenance">
-        <div class="container">
-            <h1>Society Maintenance Form</h1>
-            <form id="maintenanceForm">
-                <div>
-                    <label for="flatNumber">Flat Number:</label>
-                    <select id="flatNumber" name="flatNumber" onchange="handleSelectionChange()">
-                        <option value="default">Select Flat Number</option>
-                    </select>
-                    <span id="tooltip">Flat number not found</span>
-                </div>
-                <div>
-                    <label for="year">Year:</label>
-                    <select id="year" name="year" onchange="getPaidAmountForYear()">
-                        <option value="">Select</option>
-                        <option value="2017-18">2017-18</option>
-                        <option value="2018-19">2018-19</option>
-                        <option value="2019-20">2019-20</option>
-                        <option value="2020-21">2020-21</option>
-                        <option value="2021-22">2021-22</option>
-                        <option value="2022-23">2022-23</option>
-                        <option value="2023-24">2023-24</option>
-                        <option value="2024-25">2024-25</option>
-                    </select>
-                </div>
 
-                <div class="flex-row">
-                    <label for="flatType">Flat type:</label>
-                    <span id="flatType" style="background-color: lightgrey;">-</span>
-                    <label for="annualMaintenance">Annual Maintenance:</label>
-                    <span id="annualMaintenance" style="background-color: lightgrey;">0.0</span>
-                </div>
+	<div class="society-maintenance">
+		<div class="container">
+			<div id="alertContainer"></div>
+			<form id="maintenanceForm">
+				<div>
+					<div style="width: 200px; margin: 0 auto; text-align: center;">
+						<select id="flatNumber" name="flatNumber"
+							onchange="getDetailsByIdOnChange()">
+							<option value="default">Select Flat Number</option>
+						</select> <span id="tooltip">Flat number not found</span>
+					</div>
+				</div>
+				<div id="tableContainer">
+					<table
+						class="table table-striped table-bordered table-hover table-success border border-light">
+						<thead>
+							<tr>
+								<th class="text-center">Flat Type</th>
+								<th class="text-center">Annual Maintenance</th>
+								<th class="text-center">Paid Amount</th>
+								<th class="text-center">Paid Till Year</th>
+								<th class="text-center">Outstanding</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="table-light border-bottom border-light">
+								<td class="text-center" id="flatType"></td>
+								<td class="text-center" id="annualMaintenance"></td>
+								<td class="text-center" id="receivedTillNow"></td>
+								<td class="text-center" id="paidTillYear"></td>
+								<td class="text-center" id="totaloutstandingAmount"></td>
+							</tr>
+						</tbody>
+					</table>
 
-                <div class="flex-row">
-                    <label for="paidInYear">Paid In selected Year:</label>
-                    <span id="paidInYear" style="background-color: lightgrey;">0.0</span>
-                </div>
+					<label>Please fill below details:</label>
+					<table
+						class="table table-striped table-bordered table-hover table-success border border-light">
+						<thead>
+							<tr>
+								<th class="text-center">Date</th>
+								<th class="text-center">Payment Method</th>
+								<th class="text-center">Transaction ID</th>
+								<th class="text-center">Amount</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="table-light border-bottom border-light">
+								<td class="text-center"><input type="text"
+									class="form-control" id="transactionDate"
+									name="transactionDate" placeholder="dd-mm-yyyy"
+									oninput="formatDateInput(this)"></td>
+								<td class="text-center"><select id="paymentMethod"
+									name="paymentMethod">
+										<option value="default">Select Payment Method</option>
+								</select></td>
+								<td class="text-center"><input type="text"
+									id="transactionId" name="transactionId"></td>
+								<td class="text-center"><input type="number" id="amount"
+									name="amount" value="0.0"></td>
+							</tr>
+						</tbody>
+					</table>
+					<button type="button" onclick="validateAndSubmit()">Submit</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	</div>
 
-                <div class="flex-row">
-                    <label>You have paid <span id="receivedTillNow" style="color: green;">-</span> till year <span id="paidTillYear" style="color: grey;">-</span> and your Outstanding is: <span id="previousOutstanding" style="color: red;">0.0</span></label>
-                </div>
 
-                <div>
-                    <label for="date">Date:</label>
-                    <input type="text" id="date" name="date" placeholder="dd-mm-yyyy" oninput="formatDateInput(this)">
-                </div>
-
-                <div>
-                    <label for="paymentMethod">Payment Method:</label>
-                    <select id="paymentMethod" name="paymentMethod">
-                    <option value="default">Select Payment Method</option>
-
-                    </select>
-                </div>
-
-                <div>
-                    <label for="transactionId">Transaction ID:</label>
-                    <input type="text" id="transactionId" name="transactionId">
-                </div>
-
-                <div>
-                    <label for="amount">Amount:</label>
-                    <input type="number" id="amount" name="amount" value="0.0">
-                </div>
-
-                <div>
-                    <label for="verified">Verified:</label>
-                    <select id="verified" name="verified">
-                        <option value="true">Yes</option>
-                        <option value="false">No</option>
-                    </select>
-                </div>
-
-                <button type="button" onclick="submitForm()">Submit</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        // Function to format date input as dd-mm-yyyy
-        function formatDateInput(input) {
-            let value = input.value.replace(/\D/g, ''); // Remove non-numeric characters
-            if (value.length > 2) {
-                value = value.substring(0, 2) + '-' + value.substring(2, 4) + '-' + value.substring(4, 8);
-            } else if (value.length > 4) {
-                value = value.substring(0, 2) + '-' + value.substring(2, 4) + '-' + value.substring(4, 8);
-            }
-            input.value = value;
+	<script>
+	   // Function to format date input as dd-mm-yyyy
+    function formatDateInput(input) {
+        let value = input.value.replace(/\D/g, ''); // Remove non-numeric characters
+        if (value.length > 2) {
+            value = value.substring(0, 2) + '-' + value.substring(2, 4) + '-' + value.substring(4, 8);
+        } else if (value.length > 4) {
+            value = value.substring(0, 2) + '-' + value.substring(2, 4) + '-' + value.substring(4, 8);
         }
+        input.value = value;
+    }
+ 	// Create options and append them to the select element
+	paymentMethods.forEach(method => {
+	    const option = document.createElement('option');
+	    option.value = method;
+	    option.textContent = method;
+	    paymentMethod.appendChild(option);
+	});
+	// Create options and append them to the select element
+	flatNumbers.forEach(number => {
+	    const option = document.createElement('option');
+	    option.value = number;
+	    option.textContent = number;
+	    flatNumber.appendChild(option);
+	}); 
+    $('#transactionDate').datepicker({
+   	 format: 'dd-mm-yyyy', // Date format
+        startDate: '01-04-2015', // Minimum selectable date
+        endDate: new Date(), // Maximum selectable date (today)
+     autoclose: true
+     
+   });
     </script>
 </body>
 </html>

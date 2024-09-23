@@ -15,6 +15,7 @@ public class ExtraChargesEntry {
 	private double chargedAmount;
 	private String reason;
 	private String comments;
+	private String settled;
 
 	// Getters and setters
 	public Long getId() {
@@ -23,14 +24,6 @@ public class ExtraChargesEntry {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public double getAmount() {
-		return chargedAmount;
-	}
-
-	public void setAmount(double amount) {
-		this.chargedAmount = amount;
 	}
 
 	public String getReason() {
@@ -65,10 +58,19 @@ public class ExtraChargesEntry {
 		this.chargedAmount = chargedAmount;
 	}
 
+	public String getSettled() {
+		return settled;
+	}
+
+	public void setSettled(String settled) {
+		this.settled = settled;
+	}
+
+
 	@Override
 	public String toString() {
 		return "ExtraChargesEntry [id=" + id + ", flatNumber=" + flatNumber + ", chargedAmount=" + chargedAmount
-				+ ", reason=" + reason + ", comments=" + comments + "]";
+				+ ", reason=" + reason + ", comments=" + comments + ", settled=" + settled + "]";
 	}
 	
 	

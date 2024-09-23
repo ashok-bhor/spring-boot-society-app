@@ -15,4 +15,8 @@ public interface ExtraChargesEntryRepository extends JpaRepository<ExtraChargesE
 	double sumChargedAmountByFlatNumber(int flatNumber);
 	
 	List<ExtraChargesEntry> findByFlatNumber(int flatNumber);
+	
+	 // Method to get distinct flat numbers from Flat table
+    @Query("SELECT DISTINCT f.flatNumber FROM FlatTypeFlatNumberMap f")
+    List<Integer> findDistinctFlatNumbersFromFlat();
 }

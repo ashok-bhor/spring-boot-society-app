@@ -1,14 +1,4 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    margin: 0;
-    padding: 20px;
-}
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-}
 
 h1 {
     text-align: center;
@@ -22,7 +12,6 @@ h1 {
     grid-template-rows: repeat(4, 1fr); /* 4 rows */
     gap: 10px; /* Increased gap between blocks */
     padding: 10px;
-    margin-top: 20px; /* Move grid slightly down */
     margin-bottom: 20px; /* Add margin at the bottom */
     border: 2px solid #ddd; /* Border around grid */
     border-radius: 10px; /* Rounded corners */

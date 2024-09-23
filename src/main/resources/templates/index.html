@@ -5,19 +5,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Society Maintenance Application</title>
-<!-- Bootstrap CSS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<!-- Bootstrap CSS -->
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<!-- Font Awesome Icons (Latest Version) -->
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+
+<!-- Bootstrap CSS (Latest Version) -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+<!-- jQuery (if needed for other functionality) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Bootstrap 5 JS (Latest Version) -->
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Datepicker CSS -->
+<link
+	href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"
+	rel="stylesheet">
+
+<!-- Datepicker JS -->
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+
+
+<!-- SweetAlert2 CSS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+	rel="stylesheet">
+
+<!-- SweetAlert2 JS -->
+<script
+	src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+
 <link rel="stylesheet" href="/styles.css">
-
-<!-- jQuery -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<!-- Bootstrap JS -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-
 <!-- Custom JavaScript -->
-<script src="/scripts.js"></script>
+<script src="scripts_index.js"></script>
 <script>
 	$(document).ready(function() {
 		$('[data-toggle="tooltip"]').tooltip();
@@ -33,118 +59,187 @@
 		// Manually trigger the click event to load the default tab content
 		$('#maintenance-dashboard-tab').trigger('click');
 	});
-	
 </script>
 <style>
-body, html {
-	height: 100%;
-	margin: 0;
-	padding: 0;
-	overflow: hidden; /* Prevents scrollbars */
-}
-
-.container-fluid {
+.nav-tabs-container {
 	display: flex;
-	flex-direction: column;
-	height: 100%;
-}
-
-.nav-tabs {
-	justify-content: center;
-	border-bottom: none; /* Remove default bottom border */
-	background-color: #f0f0f0; /* Background color for tabs */
-	padding: 10px 0; /* Adjust top and bottom padding */
+	justify-content: center; /* Center the navbar */
 }
 
 .nav-tabs .nav-link {
-	color: #666; /* Default tab text color */
-	border: none; /* Remove border */
-	background-color: #f0f0f0; /* Default tab background */
-	margin-right: 10px; /* Adjust spacing between tabs */
+	color: #333; /* Default text color */
+	display: flex;
+	align-items: center; /* Align items vertically */
+	padding: 10px 15px; /* Padding around the link */
+	border-radius: 4px; /* Rounded corners */
+	transition: background-color 0.3s; /* Smooth transition */
 }
 
+.nav-tabs .nav-link i {
+	margin-right: 8px; /* Space between icon and text */
+}
+
+/* Hover state for nav links */
 .nav-tabs .nav-link:hover {
-	color: #fff; /* Hover text color */
-	background-color: #008b8b; /* Hover background color */
+	color: #ffffff; /* Text color on hover */
+	background-color: #007bff; /* Blue color for hover */
 }
 
 .nav-tabs .nav-link.active {
-	color: #fff; /* Active tab text color */
-	background-color: #ff7f50; /* Active tab background color */
+	color: #fff; /* Text color on active */
+	background-color: #f39c12; /* w3-flat-carrot */
 }
 
-.tab-content {
-	flex: 1; /* Fill remaining vertical space */
-	overflow: auto; /* Allow scrolling */
+/* Member Button Specific Styling */
+.nav-tabs .nav-link.member-button {
+	border-radius: 50%; /* Fully rounded */
+	background-color: #008080; /* w3-win8-teal */
+	color: #fff; /* White text color */
+	width: 40px; /* Set width for circle */
+	height: 40px; /* Set height for circle */
+	display: flex; /* Center content */
+	justify-content: center; /* Center content horizontally */
+	align-items: center; /* Center content vertically */
+	padding: 0; /* Remove default padding */
+	margin-right: 15px; /* Space between Member button and Logout button */
 }
 
-.tab-pane {
-	padding: 20px; /* Add some padding */
+.nav-tabs .nav-link.member-button:hover {
+	background-color: #006d6d; /* Slightly darker teal on hover */
+}
+
+/* Add margin to the logout button to create spacing */
+.logout-button {
+	margin-left: 10px; /* Space between Member button and Logout button */
 }
 </style>
+
+<script>
+	
+</script>
 </head>
 <body>
 
-<!-- <span sec:authentication="principal.authorities">[ROLE_USER, ROLE_ADMIN]</span>
- -->	<div class="container-fluid">
- <div class="table-responsive">
-		<ul class="nav nav-tabs" id="myTab" role="tablist">
-			<li class="nav-item"><a class="nav-link active"
-				id="maintenance-dashboard-tab" data-toggle="tab"
-				href="#maintenance-dashboard" role="tab"
-				aria-controls="maintenance-dashboard" aria-selected="true"
-				data-url="/maintenanceDashboard">Maintenance Dashboard</a></li>
-			<li class="nav-item"><a class="nav-link"
-				id="maintenance-entry-tab" data-toggle="tab"
-				href="#maintenance-entry" role="tab"
-				aria-controls="maintenance-entry" aria-selected="false"
-				data-url="/maintenance-entry">Maintenance Entry</a></li>
-			<li class="nav-item" sec:authorize="hasRole('ADMIN')"><a
-				class="nav-link" id="add-extra-charges-tab" data-toggle="tab"
-				href="#add-extra-charges" role="tab"
-				aria-controls="add-extra-charges" aria-selected="false"
-				data-url="/add-extra-charges">Add Extra Charges</a></li>
-			<li class="nav-item"><a class="nav-link" id="grid-view-tab"
-				data-toggle="tab" href="#grid-view" role="tab"
-				aria-controls="grid-view" aria-selected="false"
-				data-url="/grid-view">Grid View</a></li>
+	<span id="userName" sec:authentication="name" style="display: none;"></span>
+	<div class="container-fluid" style="margin-top: 5px;">
+		<div class="table-responsive">
+			<div class="nav-tabs-container">
+				<ul class="nav nav-tabs" id="myTab" role="tablist">
+					<li class="nav-item"><a class="nav-link active"
+						id="maintenance-dashboard-tab" data-toggle="tab"
+						href="#maintenance-dashboard" role="tab"
+						aria-controls="maintenance-dashboard" aria-selected="true"
+						data-url="/maintenanceDashboard"> <i
+							class="fas fa-tachometer-alt"></i> Payment Dashboard
+					</a></li>
+					<li class="nav-item"><a class="nav-link"
+						id="maintenance-entry-tab" data-toggle="tab"
+						href="#maintenance-entry" role="tab"
+						aria-controls="maintenance-entry" aria-selected="false"
+						data-url="/maintenance-entry"> <i class="fas fa-edit"></i>
 
-			<!-- Display the user's role -->
-			<li class="nav-item">
-				<button type="submit" class="btn btn-info"
-					style="margin-right: 10px;">
-						<span id="userName" class="exclude-style" data-toggle="tooltip" title="You are logged in as" sec:authentication="name"></span>
-				</button>
-			</li>
+							Entry
+					</a></li>
+					<li class="nav-item"><a class="nav-link" id="grid-view-tab"
+						data-toggle="tab" href="#grid-view" role="tab"
+						aria-controls="grid-view" aria-selected="false"
+						data-url="/grid-view"> <i class="fas fa-th"></i> Grid View
+					</a></li>
+					<li class="nav-item" sec:authorize="hasRole('ADMIN')"><a
+						class="nav-link" id="add-extra-charges-tab" data-toggle="tab"
+						href="#add-extra-charges" role="tab"
+						aria-controls="add-extra-charges" aria-selected="false"
+						data-url="/add-extra-charges"> <i class="fas fa-calculator"></i>
+							Extra Charges
+					</a></li>
+					<li class="nav-item" sec:authorize="hasRole('ADMIN')"><a
+						class="nav-link" id="unapproved-payments-tab" data-toggle="tab"
+						href="#unapproved-payments" role="tab"
+						aria-controls="unapproved-payments" aria-selected="false"
+						data-url="/unapproved-payments"> <i class="fas fa-warning"></i>
+							Unapproved Payments
+					</a></li>
 
-			<li>
-				<!-- Logout Button -->
-				<form th:action="@{/logout}" method="post" style="display: inline;">
-					<button type="submit" class="btn btn-danger"
-						style="margin-left: 10px;">Logout</button>
-				</form>
-			</li>
-		</ul>
-		<div class="tab-content mt-2" id="myTabContent">
-			<!-- Content panes for each tab -->
-			<div class="tab-pane fade show active" id="maintenance-dashboard"
-				role="tabpanel" aria-labelledby="maintenance-dashboard-tab">
-				<!-- Content will be loaded here -->
+					<li class="nav-item" sec:authorize="hasRole('ADMIN')"><a
+						class="nav-link" id="maintenance-charges-tab" data-toggle="tab"
+						href="#maintenance-charges" role="tab"
+						aria-controls="maintenance-charges" aria-selected="false"
+						data-url="/maintenance-charges"> <i
+							class="fas fa-clipboard-list"></i> Maintenace Charges
+					</a></li>
+
+					<!-- Display the user's role -->
+					<li class="nav-item" style="margin-left: 50px;"><a
+						id="userLink" data-target="#memberAlert"
+						class="nav-link member-button" href="#" title=""
+						data-toggle="tooltip"></a></li>
+					<li>
+						<!-- Logout Button -->
+						<form th:action="@{/logout}" method="post"
+							style="display: inline;" id="logoutForm">
+							<button type="submit" class="btn btn-danger logout-button">Logout</button>
+						</form>
+					</li>
+					<!-- Display the active Spring profile -->
+					<li>
+						<!-- Logout Button -->
+						<form th:action="@{/logout}" method="post"
+							style="display: inline;" id="logoutForm">
+							<button type="submit" disabled class="btn btn-danger logout-button" th:text="${session.activeProfile}"></button>
+						</form>
+					</li>
+				</ul>
 			</div>
-			<div class="tab-pane fade" id="maintenance-entry" role="tabpanel"
-				aria-labelledby="maintenance-entry-tab">
-				<!-- Content will be loaded here -->
+
+			<div class="modal fade" id="memberAlert" tabindex="-1" role="dialog"
+				aria-labelledby="memberAlertLabel" aria-hidden="true">
+				<div role="document" class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 id="memberAlertLabel" class="modal-title">Member Alert</h5>
+							<button aria-label="Close" data-dismiss="modal" class="close"
+								type="button">
+								<span aria-hidden="true">×</span>
+							</button>
+						</div>
+						<div class="modal-body">
+
+							<div role="alert" class="alert alert-info">This is a sample
+								alert message.</div>
+						</div>
+					</div>
+				</div>
 			</div>
-			<div class="tab-pane fade" id="add-extra-charges" role="tabpanel"
-				aria-labelledby="add-extra-charges-tab">
-				<!-- Content will be loaded here -->
-			</div>
-			<div class="tab-pane fade" id="grid-view" role="tabpanel"
-				aria-labelledby="grid-view-tab">
-				<!-- Content will be loaded here -->
+
+
+			<div class="tab-content mt-2" id="myTabContent">
+				<!-- Content panes for each tab -->
+				<div class="tab-pane fade show active" id="maintenance-dashboard"
+					role="tabpanel" aria-labelledby="maintenance-dashboard-tab">
+					<!-- Content will be loaded here -->
+				</div>
+				<div class="tab-pane fade" id="maintenance-entry" role="tabpanel"
+					aria-labelledby="maintenance-entry-tab">
+					<!-- Content will be loaded here -->
+				</div>
+				<div class="tab-pane fade" id="grid-view" role="tabpanel"
+					aria-labelledby="grid-view-tab">
+					<!-- Content will be loaded here -->
+				</div>
+				<div class="tab-pane fade" id="add-extra-charges" role="tabpanel"
+					aria-labelledby="add-extra-charges-tab">
+					<!-- Content will be loaded here -->
+				</div>
+				<div class="tab-pane fade" id="unapproved-payments" role="tabpanel"
+					aria-labelledby="unapproved-payments-tab">
+					<!-- Content will be loaded here -->
+				</div>
+				<div class="tab-pane fade" id="maintenance-charges" role="tabpanel"
+					aria-labelledby="maintenance-charges-tab">
+					<!-- Content will be loaded here -->
+				</div>
 			</div>
 		</div>
-	</div>
 	</div>
 </body>
 </html>

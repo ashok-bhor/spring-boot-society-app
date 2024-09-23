@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,10 +15,17 @@ import com.abpoint.model.ExtraChargesEntry;
 import com.abpoint.model.GridData;
 import com.abpoint.repository.ExtraChargesEntryRepository;
 import com.abpoint.repository.MaintenanceMasterEntryRepo;
+import com.abpoint.service.reciept.GenerateReceiptService;
 
+import lombok.extern.slf4j.Slf4j;
+
+
+@Slf4j
 //defining the business logic
 @Service
 public class SocietyUtilServices {
+
+	private static final Logger logger = LoggerFactory.getLogger(SocietyUtilServices.class);
 
 	@Autowired
 	ExtraChargesEntryRepository extraChargesEntryRepository;
@@ -27,23 +36,11 @@ public class SocietyUtilServices {
 	@Autowired
 	SocietyService serviceSociety;
 	
-	public double getExtraCharges(int flatNumber) {
-
-		Optional<Double> extraCharges = Optional
-				.ofNullable(extraChargesEntryRepository.sumChargedAmountByFlatNumber(flatNumber));
-
-		return extraCharges.orElse(0.0);
-	}
-
-	public ResponseEntity<List<ExtraChargesEntry>> getExtraChargeEntry(int flatNumber) {
-		Optional<List<ExtraChargesEntry>> extraCharges = Optional
-				.ofNullable(extraChargesEntryRepository.findByFlatNumber(flatNumber));
-
-		return ResponseEntity.ok().body(extraCharges.orElse(null));
-	}
-
+	
 	public ResponseEntity<List<GridData>> getGridDataList() {
-		return ResponseEntity.ok().body(maintenanceMasterEntryRepo.fetchGridData());
+		List<GridData> lstData = maintenanceMasterEntryRepo.fetchGridData();
+		logger.info("lstData: "+lstData);
+		return ResponseEntity.ok().body(lstData);
 	}
 
 	public String getFinancialYearOfDate(Date date) throws Exception {

@@ -1,0 +1,954 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 14.12
+-- Dumped by pg_dump version 16.3
+
+-- Started on 2024-08-20 21:27:21
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 6 (class 2615 OID 16438)
+-- Name: society; Type: SCHEMA; Schema: -; Owner: admin
+--
+
+CREATE SCHEMA society;
+
+
+ALTER SCHEMA society OWNER TO admin;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- TOC entry 241 (class 1259 OID 24948)
+-- Name: actionedpaymentsdetails; Type: TABLE; Schema: society; Owner: admin
+--
+
+CREATE TABLE society.actionedpaymentsdetails (
+    id bigint NOT NULL,
+    action character varying(255),
+    actionedby character varying(255),
+    actionedtimestamp character varying(255),
+    actionersuseragentdetails character varying(255),
+    amount double precision NOT NULL,
+    date date,
+    flatnumber integer NOT NULL,
+    paymentmethod character varying(255),
+    rejectreason character varying(255),
+    transactionid character varying(255)
+);
+
+
+ALTER TABLE society.actionedpaymentsdetails OWNER TO admin;
+
+--
+-- TOC entry 236 (class 1259 OID 24910)
+-- Name: approvalpendingpayments; Type: TABLE; Schema: society; Owner: admin
+--
+
+CREATE TABLE society.approvalpendingpayments (
+    id bigint NOT NULL,
+    amount double precision NOT NULL,
+    date date,
+    flatnumber integer NOT NULL,
+    paymentmethod character varying(255),
+    transactionid character varying(255)
+);
+
+
+ALTER TABLE society.approvalpendingpayments OWNER TO admin;
+
+--
+-- TOC entry 235 (class 1259 OID 24909)
+-- Name: approvalpendingpayments_id_seq; Type: SEQUENCE; Schema: society; Owner: admin
+--
+
+CREATE SEQUENCE society.approvalpendingpayments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE society.approvalpendingpayments_id_seq OWNER TO admin;
+
+--
+-- TOC entry 3452 (class 0 OID 0)
+-- Dependencies: 235
+-- Name: approvalpendingpayments_id_seq; Type: SEQUENCE OWNED BY; Schema: society; Owner: admin
+--
+
+ALTER SEQUENCE society.approvalpendingpayments_id_seq OWNED BY society.approvalpendingpayments.id;
+
+
+--
+-- TOC entry 237 (class 1259 OID 24918)
+-- Name: deletedextracharges; Type: TABLE; Schema: society; Owner: admin
+--
+
+CREATE TABLE society.deletedextracharges (
+    id bigint NOT NULL,
+    chargedamount double precision NOT NULL,
+    comments character varying(255),
+    deletereasonother character varying(255),
+    deletereasonselect character varying(255),
+    flatnumber integer NOT NULL,
+    reason character varying(255)
+);
+
+
+ALTER TABLE society.deletedextracharges OWNER TO admin;
+
+--
+-- TOC entry 239 (class 1259 OID 24926)
+-- Name: extrachargesentry; Type: TABLE; Schema: society; Owner: admin
+--
+
+CREATE TABLE society.extrachargesentry (
+    id bigint NOT NULL,
+    chargedamount double precision NOT NULL,
+    comments character varying(255),
+    flatnumber integer NOT NULL,
+    reason character varying(255),
+    settled character varying(255)
+);
+
+
+ALTER TABLE society.extrachargesentry OWNER TO admin;
+
+--
+-- TOC entry 238 (class 1259 OID 24925)
+-- Name: extrachargesentry_id_seq; Type: SEQUENCE; Schema: society; Owner: admin
+--
+
+CREATE SEQUENCE society.extrachargesentry_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE society.extrachargesentry_id_seq OWNER TO admin;
+
+--
+-- TOC entry 3453 (class 0 OID 0)
+-- Dependencies: 238
+-- Name: extrachargesentry_id_seq; Type: SEQUENCE OWNED BY; Schema: society; Owner: admin
+--
+
+ALTER SEQUENCE society.extrachargesentry_id_seq OWNED BY society.extrachargesentry.id;
+
+
+--
+-- TOC entry 245 (class 1259 OID 24966)
+-- Name: extrachargesentryforallflats; Type: TABLE; Schema: society; Owner: admin
+--
+
+CREATE TABLE society.extrachargesentryforallflats (
+    id bigint NOT NULL,
+    chargedamount double precision NOT NULL,
+    comments character varying(255),
+    flatnumber integer NOT NULL,
+    reason character varying(255)
+);
+
+
+ALTER TABLE society.extrachargesentryforallflats OWNER TO admin;
+
+--
+-- TOC entry 244 (class 1259 OID 24965)
+-- Name: extrachargesentryforallflats_id_seq; Type: SEQUENCE; Schema: society; Owner: admin
+--
+
+CREATE SEQUENCE society.extrachargesentryforallflats_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE society.extrachargesentryforallflats_id_seq OWNER TO admin;
+
+--
+-- TOC entry 3454 (class 0 OID 0)
+-- Dependencies: 244
+-- Name: extrachargesentryforallflats_id_seq; Type: SEQUENCE OWNED BY; Schema: society; Owner: admin
+--
+
+ALTER SEQUENCE society.extrachargesentryforallflats_id_seq OWNED BY society.extrachargesentryforallflats.id;
+
+
+--
+-- TOC entry 219 (class 1259 OID 16448)
+-- Name: flat_type_flat_number_map; Type: TABLE; Schema: society; Owner: admin
+--
+
+CREATE TABLE society.flat_type_flat_number_map (
+    flatnumber integer NOT NULL,
+    annualmaintenance double precision NOT NULL,
+    flattype character varying(255)
+);
+
+
+ALTER TABLE society.flat_type_flat_number_map OWNER TO admin;
+
+--
+-- TOC entry 240 (class 1259 OID 24934)
+-- Name: maintenancemasterentry; Type: TABLE; Schema: society; Owner: admin
+--
+
+CREATE TABLE society.maintenancemasterentry (
+    flatnumber integer NOT NULL,
+    chargedamount double precision NOT NULL,
+    currentyear character varying(255),
+    lastrecieveddate date,
+    receivedtillnow double precision NOT NULL,
+    totaloutstanding double precision NOT NULL
+);
+
+
+ALTER TABLE society.maintenancemasterentry OWNER TO admin;
+
+--
+-- TOC entry 226 (class 1259 OID 16588)
+-- Name: roles; Type: TABLE; Schema: society; Owner: postgres
+--
+
+CREATE TABLE society.roles (
+    role_id integer NOT NULL,
+    name character varying(50) NOT NULL
+);
+
+
+ALTER TABLE society.roles OWNER TO postgres;
+
+--
+-- TOC entry 225 (class 1259 OID 16587)
+-- Name: roles_role_id_seq; Type: SEQUENCE; Schema: society; Owner: postgres
+--
+
+CREATE SEQUENCE society.roles_role_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE society.roles_role_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3455 (class 0 OID 0)
+-- Dependencies: 225
+-- Name: roles_role_id_seq; Type: SEQUENCE OWNED BY; Schema: society; Owner: postgres
+--
+
+ALTER SEQUENCE society.roles_role_id_seq OWNED BY society.roles.role_id;
+
+
+--
+-- TOC entry 220 (class 1259 OID 16458)
+-- Name: society_maintenance_values_year_wise; Type: TABLE; Schema: society; Owner: admin
+--
+
+CREATE TABLE society.society_maintenance_values_year_wise (
+    recordnum integer NOT NULL,
+    financialyear character varying(255),
+    flattype character varying(255),
+    maintenancevalue double precision NOT NULL
+);
+
+
+ALTER TABLE society.society_maintenance_values_year_wise OWNER TO admin;
+
+--
+-- TOC entry 243 (class 1259 OID 24957)
+-- Name: societymaintenancepaidhistory; Type: TABLE; Schema: society; Owner: admin
+--
+
+CREATE TABLE society.societymaintenancepaidhistory (
+    id bigint NOT NULL,
+    amount double precision NOT NULL,
+    annualmaintenance double precision NOT NULL,
+    date date,
+    deleted boolean,
+    deletedreason character varying(255),
+    flatnumber integer NOT NULL,
+    flattype character varying(255),
+    paymentmethod character varying(255),
+    transactionid character varying(255),
+    year character varying(255)
+);
+
+
+ALTER TABLE society.societymaintenancepaidhistory OWNER TO admin;
+
+--
+-- TOC entry 242 (class 1259 OID 24956)
+-- Name: societymaintenancepaidhistory_id_seq; Type: SEQUENCE; Schema: society; Owner: admin
+--
+
+CREATE SEQUENCE society.societymaintenancepaidhistory_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE society.societymaintenancepaidhistory_id_seq OWNER TO admin;
+
+--
+-- TOC entry 3456 (class 0 OID 0)
+-- Dependencies: 242
+-- Name: societymaintenancepaidhistory_id_seq; Type: SEQUENCE OWNED BY; Schema: society; Owner: admin
+--
+
+ALTER SEQUENCE society.societymaintenancepaidhistory_id_seq OWNED BY society.societymaintenancepaidhistory.id;
+
+
+--
+-- TOC entry 224 (class 1259 OID 16579)
+-- Name: users; Type: TABLE; Schema: society; Owner: postgres
+--
+
+CREATE TABLE society.users (
+    user_id integer NOT NULL,
+    username character varying(45) NOT NULL,
+    password character varying(64) NOT NULL,
+    enabled smallint
+);
+
+
+ALTER TABLE society.users OWNER TO postgres;
+
+--
+-- TOC entry 227 (class 1259 OID 16596)
+-- Name: users_roles; Type: TABLE; Schema: society; Owner: postgres
+--
+
+CREATE TABLE society.users_roles (
+    user_id integer NOT NULL,
+    role_id integer NOT NULL
+);
+
+
+ALTER TABLE society.users_roles OWNER TO postgres;
+
+--
+-- TOC entry 223 (class 1259 OID 16578)
+-- Name: users_user_id_seq; Type: SEQUENCE; Schema: society; Owner: postgres
+--
+
+CREATE SEQUENCE society.users_user_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE society.users_user_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3457 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: users_user_id_seq; Type: SEQUENCE OWNED BY; Schema: society; Owner: postgres
+--
+
+ALTER SEQUENCE society.users_user_id_seq OWNED BY society.users.user_id;
+
+
+--
+-- TOC entry 3256 (class 2604 OID 24913)
+-- Name: approvalpendingpayments id; Type: DEFAULT; Schema: society; Owner: admin
+--
+
+ALTER TABLE ONLY society.approvalpendingpayments ALTER COLUMN id SET DEFAULT nextval('society.approvalpendingpayments_id_seq'::regclass);
+
+
+--
+-- TOC entry 3257 (class 2604 OID 24929)
+-- Name: extrachargesentry id; Type: DEFAULT; Schema: society; Owner: admin
+--
+
+ALTER TABLE ONLY society.extrachargesentry ALTER COLUMN id SET DEFAULT nextval('society.extrachargesentry_id_seq'::regclass);
+
+
+--
+-- TOC entry 3259 (class 2604 OID 24969)
+-- Name: extrachargesentryforallflats id; Type: DEFAULT; Schema: society; Owner: admin
+--
+
+ALTER TABLE ONLY society.extrachargesentryforallflats ALTER COLUMN id SET DEFAULT nextval('society.extrachargesentryforallflats_id_seq'::regclass);
+
+
+--
+-- TOC entry 3255 (class 2604 OID 16591)
+-- Name: roles role_id; Type: DEFAULT; Schema: society; Owner: postgres
+--
+
+ALTER TABLE ONLY society.roles ALTER COLUMN role_id SET DEFAULT nextval('society.roles_role_id_seq'::regclass);
+
+
+--
+-- TOC entry 3258 (class 2604 OID 24960)
+-- Name: societymaintenancepaidhistory id; Type: DEFAULT; Schema: society; Owner: admin
+--
+
+ALTER TABLE ONLY society.societymaintenancepaidhistory ALTER COLUMN id SET DEFAULT nextval('society.societymaintenancepaidhistory_id_seq'::regclass);
+
+
+--
+-- TOC entry 3254 (class 2604 OID 16582)
+-- Name: users user_id; Type: DEFAULT; Schema: society; Owner: postgres
+--
+
+ALTER TABLE ONLY society.users ALTER COLUMN user_id SET DEFAULT nextval('society.users_user_id_seq'::regclass);
+
+
+--
+-- TOC entry 3442 (class 0 OID 24948)
+-- Dependencies: 241
+-- Data for Name: actionedpaymentsdetails; Type: TABLE DATA; Schema: society; Owner: admin
+--
+
+COPY society.actionedpaymentsdetails (id, action, actionedby, actionedtimestamp, actionersuseragentdetails, amount, date, flatnumber, paymentmethod, rejectreason, transactionid) FROM stdin;
+6	Approved	admin	06-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2020-08-27	503	Cheque		Cheque
+11	Approved	admin	06-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2021-05-07	503	Cheque		Cheque
+16	Approved	admin	06-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2020-06-11	204	Cheque		Cheque
+10	Rejected	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	14100	2016-06-01	704	Cash	Invalid input	Cash
+1	Rejected	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	6475	2016-11-04	704	Cheque	Old Entry	Cheque
+2	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	2679	2017-05-06	704	Cheque		Cheque
+3	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	7800	2017-12-16	704	Cheque		Cheque
+4	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	9420	2018-06-19	704	Cheque		Cheque
+5	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2022-07-17	704	UPI		UPI
+8	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2023-06-04	704	UPI		UPI
+9	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2024-03-28	704	UPI		UPI
+7	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2023-03-19	704	UPI		UPI
+12	Rejected	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2022-03-30	704	UPI	wrong entry	UPI
+13	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2021-11-07	101	IMPS		IMPS
+14	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2022-08-11	101	IMPS		IMPS
+15	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	344440	2023-03-26	101	IMPS		IMPS
+17	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	2590	2017-11-20	203	Cheque		Cheque
+18	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	7800	2018-01-03	203	Cheque		Cheque
+19	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	9420	2018-06-19	203	Cheque		Cheque
+20	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	8610	2019-06-27	203	Cheque		Cheque
+21	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	8610	2020-02-26	203	Cheque		Cheque
+22	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2020-08-27	203	Cheque		Cheque
+23	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2021-05-20	203	Cheque		Cheque
+24	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2024-02-22	203	Cheque		Cheque
+25	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2022-12-15	203	Cheque		Cheque
+26	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2023-03-14	203	Cheque		Cheque
+28	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	5000	2022-03-04	203	Cheque		Cheque
+29	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	5000	2022-03-04	203	Cheque		Cheque
+27	Rejected	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2023-02-05	203	Cheque	Transaction mismatch	Cheque
+35	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	13265	2017-06-06	703	Cheque		Cheque
+36	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	7800	2017-12-16	703	Cheque		Cheque
+37	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	9420	2018-07-06	703	Cheque		Cheque
+38	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	17220	2019-11-15	703	Cheque		Cheque
+39	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	20716	2023-03-30	703	Cheque		Cheque
+40	Approved	admin	11-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	34440	2023-03-30	703	Cheque		Cheque
+41	Rejected	admin	20-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	10000	2024-08-14	402	Cheque	test	Cheque
+42	Approved	admin	20-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	1	2024-08-13	402	Cheque		Cheque
+43	Approved	admin	20-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	1	2024-08-13	402	Cheque		Cheque
+44	Approved	admin	20-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	1	2024-08-01	402	Cheque		Cheque
+45	Approved	admin	20-08-2024	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36	4	2024-06-19	402	Cheque		Cheque
+\.
+
+
+--
+-- TOC entry 3437 (class 0 OID 24910)
+-- Dependencies: 236
+-- Data for Name: approvalpendingpayments; Type: TABLE DATA; Schema: society; Owner: admin
+--
+
+COPY society.approvalpendingpayments (id, amount, date, flatnumber, paymentmethod, transactionid) FROM stdin;
+6	17220	2022-06-30	704	UPI	208922700753
+11	17220	2019-11-15	704	Cash	NA
+16	17220	2024-03-31	101	IMPS	409110831028
+30	19432	2017-02-09	702	Cheque	9359
+31	11000	2018-01-23	702	Cheque	94726
+32	11440	2018-06-19	702	Cheque	94728
+33	5000	2018-03-02	702	Cheque	94730
+\.
+
+
+--
+-- TOC entry 3438 (class 0 OID 24918)
+-- Dependencies: 237
+-- Data for Name: deletedextracharges; Type: TABLE DATA; Schema: society; Owner: admin
+--
+
+COPY society.deletedextracharges (id, chargedamount, comments, deletereasonother, deletereasonselect, flatnumber, reason) FROM stdin;
+10	18090	Outstanding of 2016-2017		Incorrect Information	703	Prior Outstanding
+42	34440	17220		Duplicate Entry	101	1BHK
+18	5000	TEST		Incorrect Information	103	Prior Outstanding
+21	5000	TEST		Duplicate Entry	601	Prior Outstanding
+22	5000	TEST		Duplicate Entry	202	Prior Outstanding
+7	2590	Outstanding of 2016-2017		Duplicate Entry	101	Prior Outstanding
+\.
+
+
+--
+-- TOC entry 3440 (class 0 OID 24926)
+-- Dependencies: 239
+-- Data for Name: extrachargesentry; Type: TABLE DATA; Schema: society; Owner: admin
+--
+
+COPY society.extrachargesentry (id, chargedamount, comments, flatnumber, reason, settled) FROM stdin;
+12	5000	Borewell Contribution	203	Common Contribution	\N
+13	5000	test	203	Prior Outstanding	\N
+16	5000	TEST	101	Prior Outstanding	\N
+17	5000	TEST	504	Prior Outstanding	\N
+19	5000	TEST	502	Prior Outstanding	\N
+20	5000	TEST	401	Prior Outstanding	\N
+23	5000	TEST	703	Prior Outstanding	\N
+24	5000	TEST	602	Prior Outstanding	\N
+25	5000	TEST	302	Prior Outstanding	\N
+26	5000	TEST	404	Prior Outstanding	\N
+27	5000	TEST	204	Prior Outstanding	\N
+28	5000	TEST	104	Prior Outstanding	\N
+29	5000	TEST	604	Prior Outstanding	\N
+30	5000	TEST	303	Prior Outstanding	\N
+31	5000	TEST	201	Prior Outstanding	\N
+32	5000	TEST	402	Prior Outstanding	\N
+33	5000	TEST	102	Prior Outstanding	\N
+34	5000	TEST	702	Prior Outstanding	\N
+35	5000	TEST	704	Prior Outstanding	\N
+36	5000	TEST	603	Prior Outstanding	\N
+37	5000	TEST	301	Prior Outstanding	\N
+38	5000	TEST	503	Prior Outstanding	\N
+39	5000	TEST	501	Prior Outstanding	\N
+40	5000	TEST	403	Prior Outstanding	\N
+41	5000	TEST	203	Prior Outstanding	\N
+43	344440	17220	101	1BHK	26/03/2023
+44	34440	17220	101	1BHK	26/03/2023
+45	34440	17220	101	1BHK	26/03/2023
+46	34440	17220	101	1BHK	26/03/2023
+47	34440	17220	101	1BHK	26/03/2023
+1	10465	Outstanding of 2016-2017	704	default	\N
+15	5000	TEST	701	default	\N
+14	5000	TEST	304	default	\N
+\.
+
+
+--
+-- TOC entry 3446 (class 0 OID 24966)
+-- Dependencies: 245
+-- Data for Name: extrachargesentryforallflats; Type: TABLE DATA; Schema: society; Owner: admin
+--
+
+COPY society.extrachargesentryforallflats (id, chargedamount, comments, flatnumber, reason) FROM stdin;
+\.
+
+
+--
+-- TOC entry 3429 (class 0 OID 16448)
+-- Dependencies: 219
+-- Data for Name: flat_type_flat_number_map; Type: TABLE DATA; Schema: society; Owner: admin
+--
+
+COPY society.flat_type_flat_number_map (flatnumber, annualmaintenance, flattype) FROM stdin;
+101	17220	1BHK
+102	22440	2BHK
+103	17220	1BHK
+104	17220	1BHK
+201	17220	1BHK
+202	22440	2BHK
+203	17220	1BHK
+204	17220	1BHK
+301	17220	1BHK
+302	22440	2BHK
+303	17220	1BHK
+304	17220	1BHK
+401	17220	1BHK
+402	22440	2BHK
+403	17220	1BHK
+404	17220	1BHK
+501	17220	1BHK
+502	18120	1.5BHK
+503	17220	1BHK
+504	17220	1BHK
+601	17220	1BHK
+602	22440	2BHK
+603	17220	1BHK
+604	17220	1BHK
+701	17220	1BHK
+702	22440	2BHK
+704	17220	1BHK
+703	17220	1BHK
+\.
+
+
+--
+-- TOC entry 3441 (class 0 OID 24934)
+-- Dependencies: 240
+-- Data for Name: maintenancemasterentry; Type: TABLE DATA; Schema: society; Owner: admin
+--
+
+COPY society.maintenancemasterentry (flatnumber, chargedamount, currentyear, lastrecieveddate, receivedtillnow, totaloutstanding) FROM stdin;
+402	0	2017-18	2024-06-19	7	179513
+103	5000	\N	\N	0	5000
+601	5000	\N	\N	0	5000
+202	5000	\N	\N	0	5000
+101	-17030	2020-21	2024-08-20	68880	-2590
+304	10000	\N	\N	0	10000
+701	10000	\N	\N	0	10000
+504	10000	\N	\N	0	10000
+502	10000	\N	\N	0	10000
+401	10000	\N	\N	0	10000
+703	1910	2019-20	2023-03-30	102861	78569
+602	10000	\N	\N	0	10000
+302	10000	\N	\N	0	10000
+404	10000	\N	\N	0	10000
+204	10000	\N	\N	0	10000
+104	10000	\N	\N	0	10000
+604	10000	\N	\N	0	10000
+303	10000	\N	\N	0	10000
+201	10000	\N	\N	0	10000
+102	10000	\N	\N	0	10000
+702	10000	\N	\N	0	10000
+704	20000	2020-21	2023-03-19	88779	68981
+603	10000	\N	\N	0	10000
+301	10000	\N	\N	0	10000
+503	10000	\N	\N	0	10000
+501	10000	\N	\N	0	10000
+403	10000	\N	\N	0	10000
+203	10000	\N	\N	0	10000
+\.
+
+
+--
+-- TOC entry 3434 (class 0 OID 16588)
+-- Dependencies: 226
+-- Data for Name: roles; Type: TABLE DATA; Schema: society; Owner: postgres
+--
+
+COPY society.roles (role_id, name) FROM stdin;
+1	ADMIN
+2	USER
+\.
+
+
+--
+-- TOC entry 3430 (class 0 OID 16458)
+-- Dependencies: 220
+-- Data for Name: society_maintenance_values_year_wise; Type: TABLE DATA; Schema: society; Owner: admin
+--
+
+COPY society.society_maintenance_values_year_wise (recordnum, financialyear, flattype, maintenancevalue) FROM stdin;
+4	2017-18	1BHK	17220
+5	2017-18	1.5BHK	18120
+6	2017-18	2BHK	22440
+7	2018-19	1BHK	17220
+8	2018-19	1.5BHK	18120
+9	2018-19	2BHK	22440
+10	2019-20	1BHK	17220
+11	2019-20	1.5BHK	18120
+12	2019-20	2BHK	22440
+13	2020-21	1BHK	17220
+14	2020-21	1.5BHK	18120
+15	2020-21	2BHK	22440
+16	2021-22	1BHK	17220
+17	2021-22	1.5BHK	18120
+18	2021-22	2BHK	22440
+19	2022-23	1BHK	17220
+20	2022-23	1.5BHK	18120
+21	2022-23	2BHK	22440
+22	2023-24	1BHK	17220
+23	2023-24	1.5BHK	18120
+24	2023-24	2BHK	22440
+25	2024-25	1BHK	17220
+26	2024-25	1.5BHK	18120
+27	2024-25	2BHK	22440
+\.
+
+
+--
+-- TOC entry 3444 (class 0 OID 24957)
+-- Dependencies: 243
+-- Data for Name: societymaintenancepaidhistory; Type: TABLE DATA; Schema: society; Owner: admin
+--
+
+COPY society.societymaintenancepaidhistory (id, amount, annualmaintenance, date, deleted, deletedreason, flatnumber, flattype, paymentmethod, transactionid, year) FROM stdin;
+1	2679	17220	2017-05-06	f	\N	704	1BHK	Cheque	390051	2017-18
+2	7800	17220	2017-12-16	f	\N	704	1BHK	Cheque	629057	2017-18
+3	9420	17220	2018-06-19	f	\N	704	1BHK	Cheque	629058	2018-19
+4	17220	17220	2022-07-17	f	\N	704	1BHK	UPI	219812497594	2022-23
+5	17220	17220	2023-06-04	f	\N	704	1BHK	UPI	315568069613	2023-24
+6	17220	17220	2024-03-28	f	\N	704	1BHK	UPI	408880599685	2023-24
+7	17220	17220	2023-03-19	f	\N	704	1BHK	UPI	307842811037	2022-23
+11	2590	17220	2017-11-20	f	\N	203	1BHK	Cheque	100049	2017-18
+12	7800	17220	2018-01-03	f	\N	203	1BHK	Cheque	100052	2017-18
+13	9420	17220	2018-06-19	f	\N	203	1BHK	Cheque	100054	2018-19
+14	8610	17220	2019-06-27	f	\N	203	1BHK	Cheque	100080	2019-20
+15	8610	17220	2020-02-26	f	\N	203	1BHK	Cheque	100089	2019-20
+16	17220	17220	2020-08-27	f	\N	203	1BHK	Cheque	100101	2020-21
+17	17220	17220	2021-05-20	f	\N	203	1BHK	Cheque	100114	2021-22
+18	17220	17220	2024-02-22	f	\N	203	1BHK	Cheque	100164	2023-24
+19	17220	17220	2022-12-15	f	\N	203	1BHK	Cheque	100145	2022-23
+20	17220	17220	2023-03-14	f	\N	203	1BHK	Cheque	100149	2022-23
+22	5000	17220	2022-03-04	f	\N	203	1BHK	Cheque	100125	2021-22
+23	13265	17220	2017-06-06	f	\N	703	2BHK	Cheque	49695	2017-18
+24	7800	17220	2017-12-16	f	\N	703	2BHK	Cheque	78244	2017-18
+25	9420	17220	2018-07-06	f	\N	703	2BHK	Cheque	78259	2018-19
+26	17220	17220	2019-11-15	f	\N	703	2BHK	Cheque	123986	2019-20
+27	20716	17220	2023-03-30	f	\N	703	2BHK	Cheque	165851	2022-23
+28	34440	17220	2023-03-30	f	\N	703	2BHK	Cheque	350451	2022-23
+8	17220	17220	2024-08-20	f	\N	101	1BHK	imps	13111294221	2021-22
+9	17220	17220	2022-08-11	f	\N	101	1BHK	imps	222311920108	2022-23
+10	34440	17220	2024-08-20	f	\N	101	1BHK	imps	308510623856	2022-23
+29	1	22440	2024-08-13	f	\N	402	2BHK	Cheque	test	2024-25
+30	1	22440	2024-08-13	f	\N	402	2BHK	Cheque	test	2024-25
+31	1	22440	2024-08-01	f	\N	402	2BHK	Cheque	test	2024-25
+45	4	22440	2024-06-19	f	\N	402	2BHK	Cheque	test	2024-25
+\.
+
+
+--
+-- TOC entry 3432 (class 0 OID 16579)
+-- Dependencies: 224
+-- Data for Name: users; Type: TABLE DATA; Schema: society; Owner: postgres
+--
+
+COPY society.users (user_id, username, password, enabled) FROM stdin;
+1	admin	$2b$12$fzFPKMEiDGduQZplzBelaOrKKOxN0IrDvXnKPId0ZCmdgWYjEQkrq	1
+2	member	$2a$12$O2LewonIRTGj0oGeQzoCnuNYJhZEHYgSSRRw1TsCIxvPwaNbKCAji	1
+\.
+
+
+--
+-- TOC entry 3435 (class 0 OID 16596)
+-- Dependencies: 227
+-- Data for Name: users_roles; Type: TABLE DATA; Schema: society; Owner: postgres
+--
+
+COPY society.users_roles (user_id, role_id) FROM stdin;
+1	1
+2	2
+\.
+
+
+--
+-- TOC entry 3458 (class 0 OID 0)
+-- Dependencies: 235
+-- Name: approvalpendingpayments_id_seq; Type: SEQUENCE SET; Schema: society; Owner: admin
+--
+
+SELECT pg_catalog.setval('society.approvalpendingpayments_id_seq', 45, true);
+
+
+--
+-- TOC entry 3459 (class 0 OID 0)
+-- Dependencies: 238
+-- Name: extrachargesentry_id_seq; Type: SEQUENCE SET; Schema: society; Owner: admin
+--
+
+SELECT pg_catalog.setval('society.extrachargesentry_id_seq', 47, true);
+
+
+--
+-- TOC entry 3460 (class 0 OID 0)
+-- Dependencies: 244
+-- Name: extrachargesentryforallflats_id_seq; Type: SEQUENCE SET; Schema: society; Owner: admin
+--
+
+SELECT pg_catalog.setval('society.extrachargesentryforallflats_id_seq', 1, false);
+
+
+--
+-- TOC entry 3461 (class 0 OID 0)
+-- Dependencies: 225
+-- Name: roles_role_id_seq; Type: SEQUENCE SET; Schema: society; Owner: postgres
+--
+
+SELECT pg_catalog.setval('society.roles_role_id_seq', 1, false);
+
+
+--
+-- TOC entry 3462 (class 0 OID 0)
+-- Dependencies: 242
+-- Name: societymaintenancepaidhistory_id_seq; Type: SEQUENCE SET; Schema: society; Owner: admin
+--
+
+SELECT pg_catalog.setval('society.societymaintenancepaidhistory_id_seq', 31, true);
+
+
+--
+-- TOC entry 3463 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: society; Owner: postgres
+--
+
+SELECT pg_catalog.setval('society.users_user_id_seq', 2, true);
+
+
+--
+-- TOC entry 3283 (class 2606 OID 24954)
+-- Name: actionedpaymentsdetails actionedpaymentsdetails_pkey; Type: CONSTRAINT; Schema: society; Owner: admin
+--
+
+ALTER TABLE ONLY society.actionedpaymentsdetails
+    ADD CONSTRAINT actionedpaymentsdetails_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3275 (class 2606 OID 24917)
+-- Name: approvalpendingpayments approvalpendingpayments_pkey; Type: CONSTRAINT; Schema: society; Owner: admin
+--
+
+ALTER TABLE ONLY society.approvalpendingpayments
+    ADD CONSTRAINT approvalpendingpayments_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3277 (class 2606 OID 24924)
+-- Name: deletedextracharges deletedextracharges_pkey; Type: CONSTRAINT; Schema: society; Owner: admin
+--
+
+ALTER TABLE ONLY society.deletedextracharges
+    ADD CONSTRAINT deletedextracharges_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3279 (class 2606 OID 24933)
+-- Name: extrachargesentry extrachargesentry_pkey; Type: CONSTRAINT; Schema: society; Owner: admin
+--
+
+ALTER TABLE ONLY society.extrachargesentry
+    ADD CONSTRAINT extrachargesentry_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3287 (class 2606 OID 24973)
+-- Name: extrachargesentryforallflats extrachargesentryforallflats_pkey; Type: CONSTRAINT; Schema: society; Owner: admin
+--
+
+ALTER TABLE ONLY society.extrachargesentryforallflats
+    ADD CONSTRAINT extrachargesentryforallflats_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3261 (class 2606 OID 16452)
+-- Name: flat_type_flat_number_map flat_type_flat_number_map_pkey; Type: CONSTRAINT; Schema: society; Owner: admin
+--
+
+ALTER TABLE ONLY society.flat_type_flat_number_map
+    ADD CONSTRAINT flat_type_flat_number_map_pkey PRIMARY KEY (flatnumber);
+
+
+--
+-- TOC entry 3281 (class 2606 OID 24938)
+-- Name: maintenancemasterentry maintenancemasterentry_pkey; Type: CONSTRAINT; Schema: society; Owner: admin
+--
+
+ALTER TABLE ONLY society.maintenancemasterentry
+    ADD CONSTRAINT maintenancemasterentry_pkey PRIMARY KEY (flatnumber);
+
+
+--
+-- TOC entry 3269 (class 2606 OID 16595)
+-- Name: roles roles_name_key; Type: CONSTRAINT; Schema: society; Owner: postgres
+--
+
+ALTER TABLE ONLY society.roles
+    ADD CONSTRAINT roles_name_key UNIQUE (name);
+
+
+--
+-- TOC entry 3271 (class 2606 OID 16593)
+-- Name: roles roles_pkey; Type: CONSTRAINT; Schema: society; Owner: postgres
+--
+
+ALTER TABLE ONLY society.roles
+    ADD CONSTRAINT roles_pkey PRIMARY KEY (role_id);
+
+
+--
+-- TOC entry 3263 (class 2606 OID 16464)
+-- Name: society_maintenance_values_year_wise society_maintenance_values_year_wise_pkey; Type: CONSTRAINT; Schema: society; Owner: admin
+--
+
+ALTER TABLE ONLY society.society_maintenance_values_year_wise
+    ADD CONSTRAINT society_maintenance_values_year_wise_pkey PRIMARY KEY (recordnum);
+
+
+--
+-- TOC entry 3285 (class 2606 OID 24964)
+-- Name: societymaintenancepaidhistory societymaintenancepaidhistory_pkey; Type: CONSTRAINT; Schema: society; Owner: admin
+--
+
+ALTER TABLE ONLY society.societymaintenancepaidhistory
+    ADD CONSTRAINT societymaintenancepaidhistory_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3265 (class 2606 OID 16584)
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: society; Owner: postgres
+--
+
+ALTER TABLE ONLY society.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (user_id);
+
+
+--
+-- TOC entry 3273 (class 2606 OID 16600)
+-- Name: users_roles users_roles_pkey; Type: CONSTRAINT; Schema: society; Owner: postgres
+--
+
+ALTER TABLE ONLY society.users_roles
+    ADD CONSTRAINT users_roles_pkey PRIMARY KEY (user_id, role_id);
+
+
+--
+-- TOC entry 3267 (class 2606 OID 16586)
+-- Name: users users_username_key; Type: CONSTRAINT; Schema: society; Owner: postgres
+--
+
+ALTER TABLE ONLY society.users
+    ADD CONSTRAINT users_username_key UNIQUE (username);
+
+
+--
+-- TOC entry 3288 (class 2606 OID 16606)
+-- Name: users_roles users_roles_role_id_fkey; Type: FK CONSTRAINT; Schema: society; Owner: postgres
+--
+
+ALTER TABLE ONLY society.users_roles
+    ADD CONSTRAINT users_roles_role_id_fkey FOREIGN KEY (role_id) REFERENCES society.roles(role_id);
+
+
+--
+-- TOC entry 3289 (class 2606 OID 16601)
+-- Name: users_roles users_roles_user_id_fkey; Type: FK CONSTRAINT; Schema: society; Owner: postgres
+--
+
+ALTER TABLE ONLY society.users_roles
+    ADD CONSTRAINT users_roles_user_id_fkey FOREIGN KEY (user_id) REFERENCES society.users(user_id);
+
+
+-- Completed on 2024-08-20 21:27:22
+
+--
+-- PostgreSQL database dump complete
+--
+

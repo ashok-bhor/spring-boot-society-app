@@ -2,6 +2,7 @@ package com.abpoint.repository;
 
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.abpoint.model.FlatTypeFlatNumberMap;
 
 @Repository
-public interface FlatTypeFlatNumberMapRepository extends CrudRepository<FlatTypeFlatNumberMap, Integer> {
+public interface FlatTypeFlatNumberMapRepository extends JpaRepository<FlatTypeFlatNumberMap, Integer> {
 
 	/* String getFlatTypeByFlatNumber(int flatNumber); */
 

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unapproved Payments</title>
+
+
+<style>
+/* Centered Container */
+.centered-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 15px;
+	width: 100%;
+	max-width: 1200px; /* Adjust as needed */
+	margin: 0 auto; /* Center container horizontally */
+}
+
+/* Form styling */
+.form-inline {
+	display: flex;
+	flex-wrap: nowrap; /* Prevent wrapping of buttons */
+	justify-content: center;
+	gap: 10px; /* Space between elements */
+}
+
+/* Table styling */
+.table-container {
+	width: 100%;
+	overflow-x: auto; /* Allows horizontal scrolling on smaller screens */
+}
+
+/* Center table class */
+.center-table {
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%; /* Ensure table takes full width */
+}
+
+/* Table styling */
+.table {
+	table-layout: auto; /* Allow table to adjust based on content */
+	width: 100%; /* Ensure table takes full width */
+}
+
+/* Modal styling */
+/* Modal styling */
+.modal-dialog {
+	max-width: 90%; /* Makes modals responsive */
+	margin: 1.75rem auto; /* Center modal vertically */
+}
+
+/* Ensure the modal content is scrollable */
+.modal-content {
+	max-height: 80vh; /* Adjust this value as needed */
+	overflow: hidden; /* Prevent overflow outside modal */
+}
+
+.modal-body {
+	padding: 15px; /* Adjust padding for better readability */
+	overflow-y: auto; /* Enable vertical scrolling within the modal body */
+}
+/* Ensure proper spacing and alignment */
+.form-group {
+	margin-bottom: 0;
+}
+
+.btn-info {
+	font-size: 14px; /* Adjust font size for smaller screens */
+}
+
+/* Responsive adjustments for landscape mode */
+@media ( max-width : 767.98px) {
+	.form-control, .btn-info {
+		width: 100%; /* Full width inputs and buttons */
+		box-sizing: border-box;
+		/* Includes padding and border in element's total width and height */
+	}
+	.table {
+		font-size: 12px; /* Adjust font size for better readability */
+	}
+	.modal-body p {
+		font-size: 14px; /* Ensure text in modals is readable */
+	}
+}
+
+/* Avoid overlapping borders */
+table {
+	border-collapse: separate;
+	border-spacing: 0;
+}
+
+td, th {
+	border: 1px solid #dee2e6; /* Consistent border color */
+	text-align: center; /* Center text in cells */
+}
+
+/* Stretch table cells to fill available space */
+th, td {
+	white-space: nowrap; /* Prevent cell content from wrapping */
+}
+
+/* Make sure the table inside the modal is responsive and scrollable */
+#rejectedPaymentTableContainer {
+	overflow-x: auto; /* Enable horizontal scrolling for the table */
+}
+
+/* Ensure the table takes full width of its container */
+#rejectedPaymentTableContainer table {
+	width: 100%;
+	border-collapse: collapse; /* Avoid overlapping borders */
+}
+
+/* Wrap table data and ensure no overflow */
+#rejectedPaymentTableContainer td, #rejectedPaymentTableContainer th {
+	white-space: nowrap; /* Prevent text from wrapping */
+	overflow: hidden; /* Hide overflowed text */
+	text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+}
+
+/* Optional: Add some spacing between table cells for readability */
+#rejectedPaymentTableContainer td, #rejectedPaymentTableContainer th {
+	padding: 8px; /* Adjust padding as needed */
+	border: 1px solid #dee2e6; /* Ensure consistent border color */
+}
+
+.table-bordered-full {
+	border: 1px solid #dee2e6; /* Adds a border around the table */
+	border-collapse: collapse; /* Ensures borders do not overlap */
+	width: 100%;
+	/* Optional: makes sure table takes full width of container */
+}
+
+.table-bordered-full th, .table-bordered-full td {
+	border: 1px solid #dee2e6; /* Applies border to all cells */
+}
+/* Ensures the modal takes up a maximum width and is centered */
+
+
+/* Scoped styles for Unapproved-payments.html */
+.unapproved-payments .form-inline {
+    display: flex;
+    justify-content: center;
+}
+
+.unapproved-payments .btn-info {
+    margin-left: 0.5rem; /* Adjust spacing as needed */
+}
+</style>
+</head>
+<body>
+	<div class="centered-container">
+		<h2>Unapproved Payments</h2>
+		<form class="form-inline mb-3">
+			<table class="table-no-border">
+				<tr>
+					<td><select id="flatNumberSelectUp" class="form-select"
+						style="height: 40px;">
+							<option value="default">Select Your Flat</option>
+							<!-- Options will be added here dynamically -->
+					</select></td>
+					<td>
+						<button id="buttonShowRejected" type="button"
+							class="btn btn-info ml-2" onclick="showRejectedPayments()"
+							style="display: none;">Show Rejected Payments</button>
+					</td>
+					<td>
+						<button id="showAllUnApproved" type="button"
+							class="btn btn-info ml-2" onclick="showUnapprovedPayments()"
+							>All Unapproved</button>
+					</td>
+				</tr>
+			</table>
+		</form>
+		<div class="table-container">
+			<table id="unApprovedTable"
+				class="table table-bordered-full center-table"
+				style="visibility: hidden; height: 0;">
+				<thead>
+					<tr>
+						<th>Payment Id</th>
+						<th>Flat Number</th>
+						<th>Date</th>
+						<th>Payment Method</th>
+						<th>Transaction ID</th>
+						<th>Amount</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody id="paymentsTable">
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+
+	<!-- Rejected Payment Details Modal -->
+	<div class="modal fade" id="rejectedPaymentModal" tabindex="-1"
+		aria-labelledby="rejectedPaymentLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document"
+			style="max-width: 60%; margin: auto;">
+			<div class="modal-content" style="overflow: auto;">
+				<div class="modal-header">
+					<h5 class="modal-title" id="rejectedPaymentLabel">Rejected
+						Payment Details</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div id="rejectedPaymentTableContainer">
+						<!-- This will be populated with data dynamically -->
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Reject Modal -->
+	<div class="modal fade" id="rejectModal" tabindex="-1"
+		aria-labelledby="rejectModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document"
+			style="max-width: 40%; margin: auto;">
+			<div class="modal-content" style="overflow: auto;">
+				<div class="modal-header">
+					<h5 class="modal-title" id="rejectModalLabel">Reject Payment</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="rejectReasonDropdown">Reason for rejection:</label> <select
+							class="form-select" id="rejectReasonDropdown"
+							onchange="handleRejectReasonChange()" required>
+							<option value="">Select reason</option>
+							<option value="Transaction not found in bank">Transaction
+								not found in bank</option>
+							<option value="Transaction mismatch">Transaction
+								mismatch</option>
+							<option value="Invalid input">Invalid input</option>
+							<option value="Other">Other</option>
+						</select>
+					</div>
+					<div class="form-group" id="otherReasonContainer"
+						style="display: none;">
+						<label for="otherRejectReason">Please specify:</label> <input
+							type="text" class="form-control" id="otherRejectReason" />
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-bs-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary"
+						onclick="submitReject()">Submit</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+	<!-- Move this script to the end -->
+	<script src="unapproved-payments.js"></script>
+	<script>
+
+    
+
+    // Add this script block to add options to the dropdown and bind events
+    flatNumbers.forEach(number => {
+        const option = document.createElement('option');
+        option.value = number;
+        option.textContent = number;
+        document.getElementById('flatNumberSelectUp').appendChild(option);
+    });
+
+    document.getElementById('flatNumberSelectUp').addEventListener('change', getPaymentsByIdOnChange);
+    </script>
+</body>
+</html>
